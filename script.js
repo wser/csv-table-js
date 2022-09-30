@@ -21,8 +21,26 @@ fetch('dummy.csv')
     }
   });
 
-const arrow = arrowLine(
-  { x: 5, y: 10 },
-  { x: 100, y: 80 },
-  { curvature: 1.5, endpoint: { type: 'squares' } }
-);
+// arrowLine(
+//   { x: 5, y: 10 },
+//   { x: 100, y: 80 },
+//   { curvature: 1.5, endpoint: { type: 'circles' } }
+// );
+
+window.addEventListener('click', (e) => {
+  placeDiv(e.x, e.y);
+
+  arrowLine({
+    source: '#box1',
+    destination: '#box2',
+    thickness: 3,
+    style: 'dot',
+  });
+});
+
+function placeDiv(x_pos, y_pos) {
+  var d = document.getElementById('box1');
+  d.style.position = 'absolute';
+  d.style.left = x_pos + 'px';
+  d.style.top = y_pos + 'px';
+}
