@@ -20,3 +20,9 @@ fetch('dummy.csv')
       }
     }
   });
+
+const arrow = arrowLine(
+  { x: 5, y: 10 },
+  { x: 100, y: 80 },
+  { curvature: 1.5, endpoint: { type: 'squares' } }
+);
