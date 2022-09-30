@@ -27,14 +27,26 @@ fetch('dummy.csv')
 //   { curvature: 1.5, endpoint: { type: 'circles' } }
 // );
 
+const src = document.getElementById('box1');
+
 window.addEventListener('click', (e) => {
   placeDiv(e.x, e.y);
 
   arrowLine({
+    // source: { x: e.x, y: e.y },
     source: '#box1',
     destination: '#box2',
-    thickness: 3,
-    style: 'dot',
+    thickness: 1,
+    color: 'blue',
+    curvature: 1.2,
+    endpoint: {
+      type: 'arrowHead', //squres, circles, arrowHead, arrowHeadFilled, none, custom
+      markerIdentifier: '', // Only allowed with custom endpoint type
+      fillColor: 'red',
+      size: 3,
+      position: 'start', //start, end, both
+    },
+    style: 'solid', // dash, dot, solid, dot-dash
   });
 });
 
