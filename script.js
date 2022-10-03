@@ -27,10 +27,24 @@
 //   { curvature: 1.5, endpoint: { type: 'circles' } }
 // );
 
-const line = document.querySelector('#__arrowLineInternal-svg-canvas');
+const line = document.querySelector('#svg-canvas');
+
+var svg = document.getElementById('svg-canvas');
+
+function removeFill(evt) {
+  var element = evt.target;
+  if (element.hasAttribute(null, 'circle')) {
+    element.removeAttribute(null, 'circle');
+  }
+}
 
 window.addEventListener('click', (e) => {
   placeDiv(e.x, e.y);
+
+  connectDivs('box2', 'box1', 'blue', 0.2);
+
+  removeFill(svg);
+  // svg.parentNode.replaceChild(svg.cloneNode(false), svg);
 
   // arrowLine({
   //   // source: { x: e.x, y: e.y },
@@ -115,34 +129,57 @@ function connectDivs(leftId, rightId, color, tension) {
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 }
 
+markerInitialized = false;
+
+function createTriangleMarker() {
+  if (markerInitialized) return;
+  markerInitialized = true;
+  var svg = createSVG();
+  var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  svg.appendChild(defs);
+
+  var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+  marker.setAttribute('id', 'triangle');
+  marker.setAttribute('viewBox', '0 0 10 10');
+  marker.setAttribute('refX', '0');
+  marker.setAttribute('refY', '5');
+  marker.setAttribute('markerUnits', 'strokeWidth');
+  marker.setAttribute('markerWidth', '10');
+  marker.setAttribute('markerHeight', '8');
+  marker.setAttribute('orient', 'auto');
+  var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  marker.appendChild(path);
+  path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+  defs.appendChild(marker);
+  //... // and the same for the start arrowhead (180° rotated)
+}
+
 function drawCurvedLine(x1, y1, x2, y2, color, tension) {
   var svg = createSVG();
   var shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  var delta = (x2 - x1) * tension;
-  var hx1 = x1 + delta;
-  var hy1 = y1;
-  var hx2 = x2 - delta;
-  var hy2 = y2;
-  var path =
-    'M ' +
-    x1 +
-    ' ' +
-    y1 +
-    ' C ' +
-    hx1 +
-    ' ' +
-    hy1 +
-    ' ' +
-    hx2 +
-    ' ' +
-    hy2 +
-    ' ' +
-    x2 +
-    ' ' +
-    y2;
+  if (tension < 0) {
+    var delta = (y2 - y1) * tension;
+    var hx1 = x1;
+    var hy1 = y1 - delta;
+    var hx2 = x2;
+    var hy2 = y2 + delta;
+  } else {
+    var delta = (x2 - x1) * tension;
+    var hx1 = x1 + delta;
+    var hy1 = y1;
+    var hx2 = x2 - delta;
+    var hy2 = y2;
+  }
+  /* prettier-ignore */
+  var path = "M "  + x1 + " " + y1 + 
+             " C " + hx1 + " " + hy1 
+                   + " " + hx2 + " " + hy2 
+             + " " + x2 + " " + y2;
   shape.setAttributeNS(null, 'd', path);
   shape.setAttributeNS(null, 'fill', 'none');
   shape.setAttributeNS(null, 'stroke', color);
+  //shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
+  shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
   svg.appendChild(shape);
 }
 
@@ -154,7 +191,6 @@ function placeDiv(x_pos, y_pos) {
   d.style.left = x_pos + 'px';
   d.style.top = y_pos + 'px';
 }
-
 /* TABLE Excle */
 for (let i = 0; i < 6; i++) {
   var row = document.querySelector('table').insertRow(-1);
