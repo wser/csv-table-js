@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="style.css" />
     <!-- <script src="https://cdn.jsdelivr.net/npm/arrow-line/dist/arrow-line.min.js"></script> -->
     <script defer src="arrow-line.min.js"></script>
+    <script defer src="svg.min.js"></script>
     <script defer src="script.js"></script>
   </head>
   <body>
@@ -13,29 +14,38 @@
     <div id="box2"></div>
     <!-- <table id="demoTable"></table> -->
 
-    <!-- <p>
-      Inspired by
-      <a href="http://thomasstreet.net/blog/spreadsheet.html"
-        >http://thomasstreet.net/blog/spreadsheet.html</a
-      >. Features:
-    </p>
+    <div class="excelTable">
+      <p>Features:</p>
 
-    <ul>
-      <li>Under 30 lines of vanilla JavaScript</li>
-      <li>Libraries used: <strong>none</strong></li>
-      <li>Excel-like syntax (formulas start with "=")</li>
-      <li>Support for arbitrary expressions (=A1+B2*C3)</li>
-      <li>Circular reference prevention</li>
-      <li>Automatic localStorage persistence</li>
-    </ul> -->
+      <ul>
+        <li>Under 30 lines of vanilla JavaScript</li>
+        <li>Libraries used: <strong>none</strong></li>
+        <li>Excel-like syntax (formulas start with "=")</li>
+        <li>Support for arbitrary expressions (=A1+B2*C3)</li>
+        <li>Circular reference prevention</li>
+        <li>Automatic localStorage persistence</li>
+      </ul>
 
-    <table></table>
+      <table></table>
 
-    <footer>
-      <p>
-        &copy; 2013 <a href="http://ondras.zarovi.cz/">Ondřej Žára</a>Ondřej Žára
-        Seznam.cz − Prague, CZ
-      </p>
-    </footer>
+      <footer>
+        <p>
+          &copy; 2013 <a href="http://ondras.zarovi.cz/">Ondřej Žára</a>Ondřej
+          Žára Seznam.cz − Prague, CZ
+        </p>
+      </footer>
+    </div>
+    <div id="left" title="left"></div>
+    <div id="right1" title="right"></div>
+    <div id="right2" title="right"></div>
+    <div id="right3" title="right"></div>
+    <div id="right4" title="right"></div>
+
+    <script>
+      connector.connectDivs('left', 'right1', 'blue', 0.2);
+      connector.connectDivs('left', 'right2', 'blue', 0.2);
+      connector.connectDivs('left', 'right3', 'blue', 0.0);
+      connector.connectDivs('left', 'right4', 'green', -0.5);
+    </script>
   </body>
 </html>
