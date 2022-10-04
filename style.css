@@ -8,6 +8,12 @@
   height: 100%;
 }
 
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: transparent;
+}
+
 /* #demoTable {
   border-collapse: collapse;
 }
@@ -20,14 +26,13 @@
 
 #box1 {
   border: 1px solid blue;
-  width: 100px;
-  height: 100px;
+  margin-left: 2rem;
 }
 
 #box2 {
   border: 1px solid red;
-  width: 100px;
-  height: 100px;
+  margin-left: 20rem;
+  background-color: transparent;
 }
 
 /*TABLE*/

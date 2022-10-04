@@ -27,18 +27,11 @@
 //   { curvature: 1.5, endpoint: { type: 'circles' } }
 // );
 
-const line = document.querySelector('#svg-canvas');
-var svg = document.getElementById('svg-canvas');
-
 window.addEventListener('click', (e) => {
   removeOldLine();
   placeDiv(e.x, e.y);
-  draw();
+  connectDivs('#box2', '#box1', 'blue', 0.2);
 });
-
-function draw() {
-  connectDivs('box2', 'box1', 'blue', 0.2);
-}
 
 function removeOldLine() {
   var e = document.querySelectorAll('.removable');
@@ -51,7 +44,6 @@ function addElm(name) {
 
 function createSVG() {
   var svg = document.getElementById('svg-canvas');
-
   if (null == svg) {
     svg = addElm('svg');
     svg.setAttribute('id', 'svg-canvas');
@@ -68,17 +60,6 @@ function createSVG() {
   return svg;
 }
 
-function drawCircle(x, y, radius, color) {
-  var svg = createSVG();
-  var shape = addElm('circle');
-  shape.setAttribute('class', 'removable');
-  shape.setAttributeNS(null, 'cx', x);
-  shape.setAttributeNS(null, 'cy', y);
-  shape.setAttributeNS(null, 'r', radius);
-  shape.setAttributeNS(null, 'fill', color);
-  svg.appendChild(shape);
-}
-
 function findAbsolutePosition(htmlElement) {
   var x = htmlElement.offsetLeft;
   var y = htmlElement.offsetTop;
@@ -93,8 +74,8 @@ function findAbsolutePosition(htmlElement) {
 }
 
 function connectDivs(leftId, rightId, color, tension) {
-  var left = document.getElementById(leftId);
-  var right = document.getElementById(rightId);
+  var left = document.querySelector(leftId);
+  var right = document.querySelector(rightId);
 
   var leftPos = findAbsolutePosition(left);
   var x1 = leftPos.x;
@@ -110,22 +91,16 @@ function connectDivs(leftId, rightId, color, tension) {
   var width = x2 - x1;
   var height = y2 - y1;
 
-  drawCircle(x1, y1, 3, color);
-  drawCircle(x2, y2, 3, color);
+  //drawCircle(x1, y1, 3, color);
+  // drawCircle(x2, y2, 3, color);
+  drawTriangle();
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 }
 
-markerInitialized = false;
-
-function createTriangleMarker() {
-  if (markerInitialized) return;
-  markerInitialized = true;
-  var svg = createSVG();
-  var defs = addElm('defs');
-  svg.appendChild(defs);
-
+function setMarker(id, color = 'black', reverse = false) {
   var marker = addElm('marker');
-  marker.setAttribute('id', 'triangle');
+  marker.setAttribute('id', id);
+
   marker.setAttribute('viewBox', '0 0 10 10');
   marker.setAttribute('refX', '0');
   marker.setAttribute('refY', '5');
@@ -133,39 +108,69 @@ function createTriangleMarker() {
   marker.setAttribute('markerWidth', '10');
   marker.setAttribute('markerHeight', '8');
   marker.setAttribute('orient', 'auto');
-  var path = addElm('path');
-  marker.appendChild(path);
-  path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
-  defs.appendChild(marker);
-  //... // and the same for the start arrowhead (180° rotated)
+
+  var mpath = addElm('path');
+  reverse
+    ? mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z') // reversed
+    : mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
+
+  // mpath.setAttributeNS(null, 'transform', 'rotate(45)');
+  mpath.setAttributeNS(null, 'fill', color);
+
+  marker.appendChild(mpath);
+  return marker;
+}
+
+function drawTriangle() {
+  let svg = createSVG();
+  let defs = addElm('defs');
+  defs.setAttribute('class', 'removable');
+
+  defs.appendChild(setMarker('trianglebackwards', 'green', true)); // start
+
+  defs.appendChild(setMarker('triangle', 'red')); // end
+
+  svg.appendChild(defs);
+}
+
+function drawCircle(x, y, radius, color) {
+  var svg = createSVG();
+  var shape = addElm('circle');
+  shape.setAttribute('class', 'removable');
+  shape.setAttributeNS(null, 'cx', x);
+  shape.setAttributeNS(null, 'cy', y);
+  shape.setAttributeNS(null, 'r', radius);
+  shape.setAttributeNS(null, 'fill', color);
+  svg.appendChild(shape);
 }
 
 function drawCurvedLine(x1, y1, x2, y2, color, tension) {
-  var svg = createSVG();
-  var shape = addElm('path');
+  let svg = createSVG();
+  let shape = addElm('path');
+  let delta, hx1, hy1, hx2, hy2;
   if (tension < 0) {
-    var delta = (y2 - y1) * tension;
-    var hx1 = x1;
-    var hy1 = y1 - delta;
-    var hx2 = x2;
-    var hy2 = y2 + delta;
+    delta = (y2 - y1) * tension;
+    hx1 = x1;
+    hy1 = y1 - delta;
+    hx2 = x2;
+    hy2 = y2 + delta;
   } else {
-    var delta = (x2 - x1) * tension;
-    var hx1 = x1 + delta;
-    var hy1 = y1;
-    var hx2 = x2 - delta;
-    var hy2 = y2;
+    delta = (x2 - x1) * tension;
+    hx1 = x1 + delta;
+    hy1 = y1;
+    hx2 = x2 - delta;
+    hy2 = y2;
   }
   /* prettier-ignore */
-  var path = "M "  + x1 + " " + y1 + 
-             " C " + hx1 + " " + hy1 
-                   + " " + hx2 + " " + hy2 
-             + " " + x2 + " " + y2;
+  let path = "M "  + x1 + " " + y1 + 
+            " C " + hx1 + " " + hy1 +
+            " " + hx2 + " " + hy2 + 
+            " " + x2 + " " + y2;
   shape.setAttribute('class', 'removable');
   shape.setAttributeNS(null, 'd', path);
   shape.setAttributeNS(null, 'fill', 'none');
   shape.setAttributeNS(null, 'stroke', color);
-  //shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
+  shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
   shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
   svg.appendChild(shape);
 }
