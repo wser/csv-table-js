@@ -28,34 +28,32 @@
 // );
 
 const line = document.querySelector('#svg-canvas');
-
 var svg = document.getElementById('svg-canvas');
 
-const group = createElm('g');
-group.setAttribute('id', 'gId');
-
-let g = document.getElementById('gId');
-
-function draw() {
-  connectDivs('box2', 'box1', 'blue', 0.2);
-
-  removeG();
-}
-
 window.addEventListener('click', (e) => {
+  removeOldLine();
   placeDiv(e.x, e.y);
-
   draw();
 });
 
-function createElm(name) {
+function draw() {
+  connectDivs('box2', 'box1', 'blue', 0.2);
+}
+
+function removeOldLine() {
+  var e = document.querySelectorAll('.removable');
+  e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
+}
+
+function addElm(name) {
   return document.createElementNS('http://www.w3.org/2000/svg', name);
 }
 
 function createSVG() {
   var svg = document.getElementById('svg-canvas');
+
   if (null == svg) {
-    svg = createElm('svg');
+    svg = addElm('svg');
     svg.setAttribute('id', 'svg-canvas');
     svg.setAttribute('style', 'position:absolute;top:0px;left:0px');
     svg.setAttribute('width', document.body.clientWidth);
@@ -72,13 +70,13 @@ function createSVG() {
 
 function drawCircle(x, y, radius, color) {
   var svg = createSVG();
-  var shape = createElm('circle');
+  var shape = addElm('circle');
+  shape.setAttribute('class', 'removable');
   shape.setAttributeNS(null, 'cx', x);
   shape.setAttributeNS(null, 'cy', y);
   shape.setAttributeNS(null, 'r', radius);
   shape.setAttributeNS(null, 'fill', color);
-  group.appendChild(shape);
-  svg.appendChild(group);
+  svg.appendChild(shape);
 }
 
 function findAbsolutePosition(htmlElement) {
@@ -123,10 +121,10 @@ function createTriangleMarker() {
   if (markerInitialized) return;
   markerInitialized = true;
   var svg = createSVG();
-  var defs = createElm('defs');
+  var defs = addElm('defs');
   svg.appendChild(defs);
 
-  var marker = createElm('marker');
+  var marker = addElm('marker');
   marker.setAttribute('id', 'triangle');
   marker.setAttribute('viewBox', '0 0 10 10');
   marker.setAttribute('refX', '0');
@@ -135,7 +133,7 @@ function createTriangleMarker() {
   marker.setAttribute('markerWidth', '10');
   marker.setAttribute('markerHeight', '8');
   marker.setAttribute('orient', 'auto');
-  var path = createElm('path');
+  var path = addElm('path');
   marker.appendChild(path);
   path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
   defs.appendChild(marker);
@@ -144,7 +142,7 @@ function createTriangleMarker() {
 
 function drawCurvedLine(x1, y1, x2, y2, color, tension) {
   var svg = createSVG();
-  var shape = createElm('path');
+  var shape = addElm('path');
   if (tension < 0) {
     var delta = (y2 - y1) * tension;
     var hx1 = x1;
@@ -163,13 +161,13 @@ function drawCurvedLine(x1, y1, x2, y2, color, tension) {
              " C " + hx1 + " " + hy1 
                    + " " + hx2 + " " + hy2 
              + " " + x2 + " " + y2;
+  shape.setAttribute('class', 'removable');
   shape.setAttributeNS(null, 'd', path);
   shape.setAttributeNS(null, 'fill', 'none');
   shape.setAttributeNS(null, 'stroke', color);
   //shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
   shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
-  group.appendChild(shape);
-  svg.appendChild(group);
+  svg.appendChild(shape);
 }
 
 /********************* */
