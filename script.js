@@ -31,44 +31,31 @@ const line = document.querySelector('#svg-canvas');
 
 var svg = document.getElementById('svg-canvas');
 
-function removeFill(evt) {
-  var element = evt.target;
-  if (element.hasAttribute(null, 'circle')) {
-    element.removeAttribute(null, 'circle');
-  }
+const group = createElm('g');
+group.setAttribute('id', 'gId');
+
+let g = document.getElementById('gId');
+
+function draw() {
+  connectDivs('box2', 'box1', 'blue', 0.2);
+
+  removeG();
 }
 
 window.addEventListener('click', (e) => {
   placeDiv(e.x, e.y);
 
-  connectDivs('box2', 'box1', 'blue', 0.2);
-
-  removeFill(svg);
-  // svg.parentNode.replaceChild(svg.cloneNode(false), svg);
-
-  // arrowLine({
-  //   // source: { x: e.x, y: e.y },
-  //   source: '#box1',
-  //   destination: '#box2',
-  //   thickness: 1,
-  //   color: 'blue',
-  //   curvature: 1.2,
-  //   endpoint: {
-  //     type: 'arrowHead', //squres, circles, arrowHead, arrowHeadFilled, none, custom
-  //     markerIdentifier: '', // Only allowed with custom endpoint type
-  //     fillColor: 'red',
-  //     size: 3,
-  //     position: 'end', //start, end, both
-  //   },
-  //   style: 'solid', // dash, dot, solid, dot-dash
-  // });
-  // line.firstElementChild.innerHTML = '';
+  draw();
 });
+
+function createElm(name) {
+  return document.createElementNS('http://www.w3.org/2000/svg', name);
+}
 
 function createSVG() {
   var svg = document.getElementById('svg-canvas');
   if (null == svg) {
-    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg = createElm('svg');
     svg.setAttribute('id', 'svg-canvas');
     svg.setAttribute('style', 'position:absolute;top:0px;left:0px');
     svg.setAttribute('width', document.body.clientWidth);
@@ -85,12 +72,13 @@ function createSVG() {
 
 function drawCircle(x, y, radius, color) {
   var svg = createSVG();
-  var shape = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  var shape = createElm('circle');
   shape.setAttributeNS(null, 'cx', x);
   shape.setAttributeNS(null, 'cy', y);
   shape.setAttributeNS(null, 'r', radius);
   shape.setAttributeNS(null, 'fill', color);
-  svg.appendChild(shape);
+  group.appendChild(shape);
+  svg.appendChild(group);
 }
 
 function findAbsolutePosition(htmlElement) {
@@ -135,10 +123,10 @@ function createTriangleMarker() {
   if (markerInitialized) return;
   markerInitialized = true;
   var svg = createSVG();
-  var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  var defs = createElm('defs');
   svg.appendChild(defs);
 
-  var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+  var marker = createElm('marker');
   marker.setAttribute('id', 'triangle');
   marker.setAttribute('viewBox', '0 0 10 10');
   marker.setAttribute('refX', '0');
@@ -147,7 +135,7 @@ function createTriangleMarker() {
   marker.setAttribute('markerWidth', '10');
   marker.setAttribute('markerHeight', '8');
   marker.setAttribute('orient', 'auto');
-  var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  var path = createElm('path');
   marker.appendChild(path);
   path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
   defs.appendChild(marker);
@@ -156,7 +144,7 @@ function createTriangleMarker() {
 
 function drawCurvedLine(x1, y1, x2, y2, color, tension) {
   var svg = createSVG();
-  var shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  var shape = createElm('path');
   if (tension < 0) {
     var delta = (y2 - y1) * tension;
     var hx1 = x1;
@@ -180,7 +168,8 @@ function drawCurvedLine(x1, y1, x2, y2, color, tension) {
   shape.setAttributeNS(null, 'stroke', color);
   //shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
   shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
-  svg.appendChild(shape);
+  group.appendChild(shape);
+  svg.appendChild(group);
 }
 
 /********************* */
@@ -191,37 +180,41 @@ function placeDiv(x_pos, y_pos) {
   d.style.left = x_pos + 'px';
   d.style.top = y_pos + 'px';
 }
+
+/************* */
 /* TABLE Excle */
-for (let i = 0; i < 6; i++) {
-  var row = document.querySelector('table').insertRow(-1);
-  for (var j = 0; j < 6; j++) {
-    var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-    row.insertCell(-1).innerHTML =
-      i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-  }
-}
+// for (let i = 0; i < 6; i++) {
+//   var row = document.querySelector('table').insertRow(-1);
+//   for (var j = 0; j < 6; j++) {
+//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
+//     row.insertCell(-1).innerHTML =
+//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
+//   }
+// }
 
-var DATA = {},
-  INPUTS = [].slice.call(document.querySelectorAll('input'));
-INPUTS.forEach((elm) => {
-  elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
+// var DATA = {},
+//   INPUTS = [].slice.call(document.querySelectorAll('input'));
+// INPUTS.forEach((elm) => {
+//   elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
 
-  elm.onblur = function (e) {
-    localStorage[e.target.id] = e.target.value;
-    computeAll();
-  };
-  var getter = function () {
-    var value = localStorage[elm.id] || '';
-    if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-    else return isNaN(parseFloat(value)) ? value : parseFloat(value);
-  };
-  Object.defineProperty(DATA, elm.id, { get: getter });
-  Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
-});
-(window.computeAll = () => {
-  INPUTS.forEach(function (elm) {
-    try {
-      elm.value = DATA[elm.id];
-    } catch (e) {}
-  });
-})();
+//   elm.onblur = function (e) {
+//     localStorage[e.target.id] = e.target.value;
+//     computeAll();
+//   };
+//   var getter = function () {
+//     var value = localStorage[elm.id] || '';
+//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
+//     else return isNaN(parseFloat(value)) ? value : parseFloat(value);
+//   };
+//   Object.defineProperty(DATA, elm.id, { get: getter });
+//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
+// });
+// (window.computeAll = () => {
+//   INPUTS.forEach(function (elm) {
+//     try {
+//       elm.value = DATA[elm.id];
+//     } catch (e) {}
+//   });
+// })();
+
+/************* */
