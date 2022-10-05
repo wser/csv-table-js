@@ -12,6 +12,7 @@
   width: 100px;
   height: 100px;
   background-color: transparent;
+  position: relative;
 }
 
 /* #demoTable {
@@ -26,13 +27,10 @@
 
 #box1 {
   border: 1px solid blue;
-  margin-left: 2rem;
 }
 
 #box2 {
   border: 1px solid red;
-  margin-left: 20rem;
-  background-color: transparent;
 }
 
 /*TABLE*/
@@ -59,3 +57,5 @@ tr:first-child td,
 td:first-child { background-color: #ccc; padding: 1px 3px; font-weight: bold; text-align: center; }
 /* prettier-ignore */
 footer { font-size: 80%; }
+
+/* DRAGGING */

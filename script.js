@@ -29,8 +29,13 @@
 
 window.addEventListener('click', (e) => {
   removeOldLine();
-  placeDiv(e.x, e.y);
+  //placeDiv(e.x, e.y);
+  // Make the DIV element draggable:
+  //dragElement('box1');
+
   connectDivs('#box2', '#box1', 'blue', 0.2);
+  draggable(document.querySelector('#box1'));
+  draggable(document.querySelector('#box2'));
 });
 
 function removeOldLine() {
@@ -47,7 +52,7 @@ function createSVG() {
   if (null == svg) {
     svg = addElm('svg');
     svg.setAttribute('id', 'svg-canvas');
-    svg.setAttribute('style', 'position:absolute;top:0px;left:0px');
+    svg.setAttribute('style', 'position:absolute;top:0px;left:0px;z-index:-1');
     svg.setAttribute('width', document.body.clientWidth);
     svg.setAttribute('height', document.body.clientHeight);
     svg.setAttributeNS(
@@ -102,7 +107,7 @@ function setMarker(id, color = 'black', reverse = false) {
   marker.setAttribute('id', id);
 
   marker.setAttribute('viewBox', '0 0 10 10');
-  marker.setAttribute('refX', '0');
+  marker.setAttribute('refX', '5');
   marker.setAttribute('refY', '5');
   marker.setAttribute('markerUnits', 'strokeWidth');
   marker.setAttribute('markerWidth', '10');
@@ -110,9 +115,11 @@ function setMarker(id, color = 'black', reverse = false) {
   marker.setAttribute('orient', 'auto');
 
   var mpath = addElm('path');
-  reverse
-    ? mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z') // reversed
-    : mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
+  if (reverse) {
+    mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
+  } else {
+    mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z'); // reversed
+  }
 
   // mpath.setAttributeNS(null, 'transform', 'rotate(45)');
   mpath.setAttributeNS(null, 'fill', color);
@@ -177,12 +184,12 @@ function drawCurvedLine(x1, y1, x2, y2, color, tension) {
 
 /********************* */
 
-function placeDiv(x_pos, y_pos) {
-  var d = document.getElementById('box1');
-  d.style.position = 'relative';
-  d.style.left = x_pos + 'px';
-  d.style.top = y_pos + 'px';
-}
+// function placeDiv(x_pos, y_pos) {
+//   var d = document.getElementById('box1');
+//   d.style.position = 'relative';
+//   d.style.left = x_pos + 'px';
+//   d.style.top = y_pos + 'px';
+// }
 
 /************* */
 /* TABLE Excle */
@@ -221,3 +228,28 @@ function placeDiv(x_pos, y_pos) {
 // })();
 
 /************* */
+
+/** DRAGGING */
+
+function draggable(container, handle) {
+  let movable = handle ? handle : container;
+  ['mousedown', 'touchstart'].forEach((event) => {
+    movable.addEventListener(event, (e) => {
+      var offsetX = e.clientX - parseInt(getComputedStyle(container).left);
+      var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
+
+      function mouseMoveHandler(e) {
+        container.style.top = e.clientY - offsetY + 'px';
+        container.style.left = e.clientX - offsetX + 'px';
+      }
+
+      function reset() {
+        removeEventListener('mousemove', mouseMoveHandler);
+        removeEventListener('mouseup', reset);
+      }
+
+      addEventListener('mousemove', mouseMoveHandler);
+      addEventListener('mouseup', reset);
+    });
+  });
+}
