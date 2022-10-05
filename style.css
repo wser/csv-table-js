@@ -19,6 +19,10 @@
   cursor: move;
 }
 
+.active {
+  border: 3px solid green !important;
+}
+
 /* #demoTable {
   border-collapse: collapse;
 }
@@ -63,3 +67,10 @@ td:first-child { background-color: #ccc; padding: 1px 3px; font-weight: bold; te
 footer { font-size: 80%; }
 
 /* DRAGGING */
+#caree {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background-color: black;
+  border-radius: 40px;
+}

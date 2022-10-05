@@ -21,16 +21,6 @@
 //     }
 //   });
 
-window.addEventListener('click', (e) => {
-  removeOldLine();
-  //placeDiv(e.x, e.y);
-
-  draggable(document.querySelector('#box1'));
-  draggable(document.querySelector('#box2'));
-
-  connectDivs('#box2', '#box1', 'blue', 0.2);
-});
-
 function removeOldLine() {
   var e = document.querySelectorAll('.removable');
   e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
@@ -56,7 +46,7 @@ function connectDivs(leftId, rightId, color, tension) {
 
   //drawCircle(x1, y1, 3, color);
   // drawCircle(x2, y2, 3, color);
-  drawTriangle();
+  addDefs();
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 
   function addElm(name) {
@@ -107,11 +97,8 @@ function connectDivs(leftId, rightId, color, tension) {
     marker.setAttribute('orient', 'auto');
 
     var mpath = addElm('path');
-    if (reverse) {
-      mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
-    } else {
-      mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z'); // reversed
-    }
+    if (reverse) mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
+    else mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z'); // reversed
 
     // mpath.setAttributeNS(null, 'transform', 'rotate(45)');
     mpath.setAttributeNS(null, 'fill', color);
@@ -120,7 +107,7 @@ function connectDivs(leftId, rightId, color, tension) {
     return marker;
   }
 
-  function drawTriangle() {
+  function addDefs() {
     let svg = createSVG();
     let defs = addElm('defs');
     defs.setAttribute('class', 'removable');
@@ -245,4 +232,56 @@ function draggable(container, handle) {
       addEventListener('mouseup', reset);
     });
   });
+}
+
+function touchHandler(event) {
+  /* prettier-ignore */
+  var touches = event.changedTouches, first = touches[0], type = '';
+  /* prettier-ignore */
+  switch(event.type){
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        default:           return;
+    }
+
+  // initMouseEvent(type, canBubble, cancelable, view, clickCount,
+  //                screenX, screenY, clientX, clientY, ctrlKey,
+  //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+  var simulatedEvent = document.createEvent('MouseEvent');
+  /* prettier-ignore */
+  simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+  first.target.dispatchEvent(simulatedEvent);
+  event.preventDefault();
+}
+
+window.addEventListener('mouseup', runIt);
+window.addEventListener('touchend', runIt);
+
+window.addEventListener('load', (e) => {
+  runIt();
+  draggable(document.querySelector('#box1'));
+  draggable(document.querySelector('#box2'));
+  document.addEventListener('touchstart', touchHandler, true);
+  document.addEventListener('touchmove', touchHandler, true);
+  document.addEventListener('touchend', touchHandler, true);
+  document.addEventListener('touchcancel', touchHandler, true);
+  const boxes = document.querySelectorAll('.box');
+
+  for (const box of boxes) {
+    box.addEventListener('mouseup', touchHandler);
+    box.addEventListener('mouseup', () => box.classList.toggle('active'));
+    box.addEventListener('touchend', touchHandler);
+    box.addEventListener('touchend', () => box.classList.toggle('active'));
+  }
+});
+
+function runIt() {
+  removeOldLine();
+  connectDivs('#box2', '#box1', 'blue', 0.2);
 }
