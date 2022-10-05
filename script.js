@@ -21,61 +21,19 @@
 //     }
 //   });
 
-// arrowLine(
-//   { x: 5, y: 10 },
-//   { x: 100, y: 80 },
-//   { curvature: 1.5, endpoint: { type: 'circles' } }
-// );
-
 window.addEventListener('click', (e) => {
   removeOldLine();
   //placeDiv(e.x, e.y);
-  // Make the DIV element draggable:
-  //dragElement('box1');
 
-  connectDivs('#box2', '#box1', 'blue', 0.2);
   draggable(document.querySelector('#box1'));
   draggable(document.querySelector('#box2'));
+
+  connectDivs('#box2', '#box1', 'blue', 0.2);
 });
 
 function removeOldLine() {
   var e = document.querySelectorAll('.removable');
   e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
-}
-
-function addElm(name) {
-  return document.createElementNS('http://www.w3.org/2000/svg', name);
-}
-
-function createSVG() {
-  var svg = document.getElementById('svg-canvas');
-  if (null == svg) {
-    svg = addElm('svg');
-    svg.setAttribute('id', 'svg-canvas');
-    svg.setAttribute('style', 'position:absolute;top:0px;left:0px;z-index:-1');
-    svg.setAttribute('width', document.body.clientWidth);
-    svg.setAttribute('height', document.body.clientHeight);
-    svg.setAttributeNS(
-      'http://www.w3.org/2000/xmlns/',
-      'xmlns:xlink',
-      'http://www.w3.org/1999/xlink'
-    );
-    document.body.appendChild(svg);
-  }
-  return svg;
-}
-
-function findAbsolutePosition(htmlElement) {
-  var x = htmlElement.offsetLeft;
-  var y = htmlElement.offsetTop;
-  for (var x = 0, y = 0, el = htmlElement; el != null; el = el.offsetParent) {
-    x += el.offsetLeft;
-    y += el.offsetTop;
-  }
-  return {
-    x: x,
-    y: y,
-  };
 }
 
 function connectDivs(leftId, rightId, color, tension) {
@@ -100,86 +58,121 @@ function connectDivs(leftId, rightId, color, tension) {
   // drawCircle(x2, y2, 3, color);
   drawTriangle();
   drawCurvedLine(x1, y1, x2, y2, color, tension);
-}
 
-function setMarker(id, color = 'black', reverse = false) {
-  var marker = addElm('marker');
-  marker.setAttribute('id', id);
-
-  marker.setAttribute('viewBox', '0 0 10 10');
-  marker.setAttribute('refX', '5');
-  marker.setAttribute('refY', '5');
-  marker.setAttribute('markerUnits', 'strokeWidth');
-  marker.setAttribute('markerWidth', '10');
-  marker.setAttribute('markerHeight', '8');
-  marker.setAttribute('orient', 'auto');
-
-  var mpath = addElm('path');
-  if (reverse) {
-    mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
-  } else {
-    mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z'); // reversed
+  function addElm(name) {
+    return document.createElementNS('http://www.w3.org/2000/svg', name);
   }
 
-  // mpath.setAttributeNS(null, 'transform', 'rotate(45)');
-  mpath.setAttributeNS(null, 'fill', color);
-
-  marker.appendChild(mpath);
-  return marker;
-}
-
-function drawTriangle() {
-  let svg = createSVG();
-  let defs = addElm('defs');
-  defs.setAttribute('class', 'removable');
-
-  defs.appendChild(setMarker('trianglebackwards', 'green', true)); // start
-
-  defs.appendChild(setMarker('triangle', 'red')); // end
-
-  svg.appendChild(defs);
-}
-
-function drawCircle(x, y, radius, color) {
-  var svg = createSVG();
-  var shape = addElm('circle');
-  shape.setAttribute('class', 'removable');
-  shape.setAttributeNS(null, 'cx', x);
-  shape.setAttributeNS(null, 'cy', y);
-  shape.setAttributeNS(null, 'r', radius);
-  shape.setAttributeNS(null, 'fill', color);
-  svg.appendChild(shape);
-}
-
-function drawCurvedLine(x1, y1, x2, y2, color, tension) {
-  let svg = createSVG();
-  let shape = addElm('path');
-  let delta, hx1, hy1, hx2, hy2;
-  if (tension < 0) {
-    delta = (y2 - y1) * tension;
-    hx1 = x1;
-    hy1 = y1 - delta;
-    hx2 = x2;
-    hy2 = y2 + delta;
-  } else {
-    delta = (x2 - x1) * tension;
-    hx1 = x1 + delta;
-    hy1 = y1;
-    hx2 = x2 - delta;
-    hy2 = y2;
+  function createSVG() {
+    var svg = document.getElementById('svg-canvas');
+    if (null == svg) {
+      svg = addElm('svg');
+      svg.setAttribute('id', 'svg-canvas');
+      svg.setAttribute('style', 'position:absolute;top:0px;left:0px;z-index:-1');
+      svg.setAttribute('width', document.body.clientWidth);
+      svg.setAttribute('height', document.body.clientHeight);
+      svg.setAttributeNS(
+        'http://www.w3.org/2000/xmlns/',
+        'xmlns:xlink',
+        'http://www.w3.org/1999/xlink'
+      );
+      document.body.appendChild(svg);
+    }
+    return svg;
   }
-  /* prettier-ignore */
-  let path = "M "  + x1 + " " + y1 + 
-            " C " + hx1 + " " + hy1 +
-            " " + hx2 + " " + hy2 + 
-            " " + x2 + " " + y2;
-  shape.setAttribute('class', 'removable');
-  shape.setAttributeNS(null, 'd', path);
-  shape.setAttributeNS(null, 'fill', 'none');
-  shape.setAttributeNS(null, 'stroke', color);
-  shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
-  shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
-  svg.appendChild(shape);
+
+  function findAbsolutePosition(htmlElement) {
+    var x = htmlElement.offsetLeft;
+    var y = htmlElement.offsetTop;
+    for (var x = 0, y = 0, el = htmlElement; el != null; el = el.offsetParent) {
+      x += el.offsetLeft;
+      y += el.offsetTop;
+    }
+    return {
+      x: x,
+      y: y,
+    };
+  }
+
+  function setMarker(id, color = 'black', reverse = false) {
+    var marker = addElm('marker');
+    marker.setAttribute('id', id);
+
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '5');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerUnits', 'strokeWidth');
+    marker.setAttribute('markerWidth', '10');
+    marker.setAttribute('markerHeight', '8');
+    marker.setAttribute('orient', 'auto');
+
+    var mpath = addElm('path');
+    if (reverse) {
+      mpath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z'); // normal
+    } else {
+      mpath.setAttribute('d', 'M 0,5 10,0 10,10 Z'); // reversed
+    }
+
+    // mpath.setAttributeNS(null, 'transform', 'rotate(45)');
+    mpath.setAttributeNS(null, 'fill', color);
+
+    marker.appendChild(mpath);
+    return marker;
+  }
+
+  function drawTriangle() {
+    let svg = createSVG();
+    let defs = addElm('defs');
+    defs.setAttribute('class', 'removable');
+
+    defs.appendChild(setMarker('trianglebackwards', 'green', true)); // start
+
+    defs.appendChild(setMarker('triangle', 'red')); // end
+
+    svg.appendChild(defs);
+  }
+
+  function drawCircle(x, y, radius, color) {
+    var svg = createSVG();
+    var shape = addElm('circle');
+    shape.setAttribute('class', 'removable');
+    shape.setAttributeNS(null, 'cx', x);
+    shape.setAttributeNS(null, 'cy', y);
+    shape.setAttributeNS(null, 'r', radius);
+    shape.setAttributeNS(null, 'fill', color);
+    svg.appendChild(shape);
+  }
+
+  function drawCurvedLine(x1, y1, x2, y2, color, tension) {
+    let svg = createSVG();
+    let shape = addElm('path');
+    let delta, hx1, hy1, hx2, hy2;
+    if (tension < 0) {
+      delta = (y2 - y1) * tension;
+      hx1 = x1;
+      hy1 = y1 - delta;
+      hx2 = x2;
+      hy2 = y2 + delta;
+    } else {
+      delta = (x2 - x1) * tension;
+      hx1 = x1 + delta;
+      hy1 = y1;
+      hx2 = x2 - delta;
+      hy2 = y2;
+    }
+    /* prettier-ignore */
+    let path = "M "  + x1 + " " + y1 + 
+              " C " + hx1 + " " + hy1 +
+              " " + hx2 + " " + hy2 + 
+              " " + x2 + " " + y2;
+    shape.setAttribute('class', 'removable');
+    shape.setAttributeNS(null, 'd', path);
+    shape.setAttributeNS(null, 'fill', 'none');
+    shape.setAttributeNS(null, 'stroke', color);
+    shape.setAttributeNS(null, 'marker-start', 'url(#trianglebackwards)');
+    shape.setAttributeNS(null, 'marker-end', 'url(#triangle)');
+    svg.appendChild(shape);
+  }
 }
 
 /********************* */
