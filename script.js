@@ -68,8 +68,7 @@
 
 /************* */
 
-/** DRAGGING */
-
+/** DRAGGING enabler*/
 function draggable(container, handle) {
   let movable = handle ? handle : container;
   ['mousedown', 'touchstart'].forEach((event) => {
@@ -98,11 +97,14 @@ function draggable(container, handle) {
   });
 }
 
+/** TOUCH enabler */
+/*! modernizr 3.6.0 (Custom Build) | MIT *
+ * https://modernizr.com/download/?-passiveeventlisteners-setclasses !*/
+/* prettier-ignore */
+!function(e,n,s){function o(e,n){return typeof e===n}function a(){var e,n,s,a,t,f,l;for(var c in r)if(r.hasOwnProperty(c)){if(e=[],n=r[c],n.name&&(e.push(n.name.toLowerCase()),n.options&&n.options.aliases&&n.options.aliases.length))for(s=0;s<n.options.aliases.length;s++)e.push(n.options.aliases[s].toLowerCase());for(a=o(n.fn,"function")?n.fn():n.fn,t=0;t<e.length;t++)f=e[t],l=f.split("."),1===l.length?Modernizr[l[0]]=a:(!Modernizr[l[0]]||Modernizr[l[0]]instanceof Boolean||(Modernizr[l[0]]=new Boolean(Modernizr[l[0]])),Modernizr[l[0]][l[1]]=a),i.push((a?"":"no-")+l.join("-"))}}function t(e){var n=l.className,s=Modernizr._config.classPrefix||"";if(c&&(n=n.baseVal),Modernizr._config.enableJSClass){var o=new RegExp("(^|\\s)"+s+"no-js(\\s|$)");n=n.replace(o,"$1"+s+"js$2")}Modernizr._config.enableClasses&&(n+=" "+s+e.join(" "+s),c?l.className.baseVal=n:l.className=n)}var i=[],r=[],f={_version:"3.6.0",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(e,n){var s=this;setTimeout(function(){n(s[e])},0)},addTest:function(e,n,s){r.push({name:e,fn:n,options:s})},addAsyncTest:function(e){r.push({name:null,fn:e})}},Modernizr=function(){};Modernizr.prototype=f,Modernizr=new Modernizr;var l=n.documentElement,c="svg"===l.nodeName.toLowerCase();Modernizr.addTest("passiveeventlisteners",function(){var n=!1;try{var s=Object.defineProperty({},"passive",{get:function(){n=!0}});e.addEventListener("test",null,s)}catch(o){}return n}),a(),t(i),delete f.addTest,delete f.addAsyncTest;for(var u=0;u<Modernizr._q.length;u++)Modernizr._q[u]();e.Modernizr=Modernizr}(window,document);
 function touchHandler(event) {
   /* prettier-ignore */
-  var touches = event.changedTouches, 
-    first = touches[0], 
-    type = '';
+  var touches = event.changedTouches, first = touches[0], type = '';
   /* prettier-ignore */
   switch(event.type){
         case "touchstart": type = "mousedown"; break;
@@ -123,43 +125,39 @@ function touchHandler(event) {
                                   false, false, false, 0/*left*/, null);
 
   first.target.dispatchEvent(simulatedEvent);
-  //event.preventDefault();
 }
 
+/**************************************************************** */
 /* implementation */
-
+const boxes = document.querySelectorAll('.box');
 const $ = (id) => document.querySelector(id);
+const $$ = (c) => document.querySelectorAll(c);
+/* prettier-ignore */
+const isPassive = () => Modernizr.passiveeventlisteners ? { passive: true } : false;
 
-window.addEventListener('mouseup', runIt);
-window.addEventListener('touchend', runIt);
+window.addEventListener('load', init); // on first load run init
 
-function isPassive() {
-  return Modernizr.passiveeventlisteners ? { passive: true } : false;
-}
-
-window.addEventListener('load', (e) => {
-  runIt();
-  draggable($('#box1'));
-  draggable($('#box2'));
-  draggable($('#box3'));
-
-  $('#movables').addEventListener('touchstart', touchHandler, isPassive());
-  $('#movables').addEventListener('touchmove', touchHandler, isPassive());
-  $('#movables').addEventListener('touchend', touchHandler, isPassive());
-  $('#movables').addEventListener('touchcancel', touchHandler, isPassive());
-
-  const boxes = document.querySelectorAll('.box');
+function init() {
+  // attach event listeners to specific html elements
   for (const box of boxes) {
-    // box.addEventListener('mouseup', touchHandler);
-    box.addEventListener('mouseup', () => box.classList.toggle('active'), false);
-    //  box.addEventListener('touchend', touchHandler);
-    box.addEventListener(
-      'touchend',
-      () => box.classList.toggle('active'),
-      false
-    );
+    // attach touch/mouse handler to boxes
+    box.addEventListener('touchstart', touchHandler, isPassive());
+    box.addEventListener('touchmove', touchHandler, isPassive());
+    box.addEventListener('touchend', touchHandler, isPassive());
+    box.addEventListener('touchcancel', touchHandler, isPassive());
+
+    draggable(box); // make boxes draggable
+
+    // toggle active css class
+    box.addEventListener('mouseup', () => box.classList.toggle('active'));
+    box.addEventListener('touchend', () => box.classList.toggle('active'));
+    // on end of interaction redraw line
+    box.addEventListener('mouseup', runIt);
+    box.addEventListener('touchend', runIt);
   }
-});
+  // run other functions
+  runIt();
+}
 
 function connectDivs(leftId, rightId, color, tension) {
   var left = document.querySelector(leftId);
@@ -298,13 +296,11 @@ function connectDivs(leftId, rightId, color, tension) {
   }
 }
 
-function removeOldLines() {
-  var e = document.querySelectorAll('.removable');
-  e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
-}
-
 function runIt() {
-  removeOldLines();
+  /* remove old lines */
+  $$('.removable').forEach((e) => e.parentNode.removeChild(e));
+
+  /* draw line between html elements */
   connectDivs('#box1', '#box2', 'blue', 0.2);
   connectDivs('#box2', '#box3', 'red', 0.2);
 }
