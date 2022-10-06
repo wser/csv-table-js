@@ -76,7 +76,7 @@ function draggable(container, handle) {
     movable.addEventListener(
       event,
       (e) => {
-        e.preventDefault();
+        //e.preventDefault();
         var offsetX = e.clientX - parseInt(getComputedStyle(container).left);
         var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
 
@@ -123,7 +123,7 @@ function touchHandler(event) {
                                   false, false, false, 0/*left*/, null);
 
   first.target.dispatchEvent(simulatedEvent);
-  event.preventDefault();
+  //event.preventDefault();
 }
 
 /* implementation */
@@ -133,23 +133,31 @@ const $ = (id) => document.querySelector(id);
 window.addEventListener('mouseup', runIt);
 window.addEventListener('touchend', runIt);
 
+function isPassive() {
+  return Modernizr.passiveeventlisteners ? { passive: true } : false;
+}
+
 window.addEventListener('load', (e) => {
   runIt();
   draggable($('#box1'));
   draggable($('#box2'));
   draggable($('#box3'));
 
-  document.addEventListener('touchstart', touchHandler, true);
-  document.addEventListener('touchmove', touchHandler, true);
-  document.addEventListener('touchend', touchHandler, true);
-  document.addEventListener('touchcancel', touchHandler, true);
+  $('#movables').addEventListener('touchstart', touchHandler, isPassive());
+  $('#movables').addEventListener('touchmove', touchHandler, isPassive());
+  $('#movables').addEventListener('touchend', touchHandler, isPassive());
+  $('#movables').addEventListener('touchcancel', touchHandler, isPassive());
 
   const boxes = document.querySelectorAll('.box');
   for (const box of boxes) {
-    box.addEventListener('mouseup', touchHandler);
-    box.addEventListener('mouseup', () => box.classList.toggle('active'));
-    box.addEventListener('touchend', touchHandler);
-    box.addEventListener('touchend', () => box.classList.toggle('active'));
+    // box.addEventListener('mouseup', touchHandler);
+    box.addEventListener('mouseup', () => box.classList.toggle('active'), false);
+    //  box.addEventListener('touchend', touchHandler);
+    box.addEventListener(
+      'touchend',
+      () => box.classList.toggle('active'),
+      false
+    );
   }
 });
 
