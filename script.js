@@ -138,8 +138,13 @@ const isPassive = () => Modernizr.passiveeventlisteners ? { passive: true } : fa
 window.addEventListener('load', init); // on first load run init
 
 function init() {
+  let mouseMoving = false;
   // attach event listeners to specific html elements
   for (const box of boxes) {
+    const toggle = () => {
+      if (!mouseMoving) box.classList.toggle('active');
+    };
+
     // attach touch/mouse handler to boxes
     box.addEventListener('touchstart', touchHandler, isPassive());
     box.addEventListener('touchmove', touchHandler, isPassive());
@@ -148,9 +153,13 @@ function init() {
 
     draggable(box); // make boxes draggable
 
+    box.onmousedown = (e) => (mouseMoving = false);
+    box.onmousemove = (e) => (mouseMoving = true);
+
     // toggle active css class
-    box.addEventListener('mouseup', () => box.classList.toggle('active'));
-    box.addEventListener('touchend', () => box.classList.toggle('active'));
+    box.addEventListener('mouseup', toggle);
+    box.addEventListener('touchend', toggle);
+
     // on end of interaction redraw line
     box.addEventListener('mouseup', runIt);
     box.addEventListener('touchend', runIt);
@@ -160,16 +169,16 @@ function init() {
 }
 
 function connectDivs(leftId, rightId, color, tension) {
-  let left = $(leftId);
-  let right = $(rightId);
+  /* prettier-ignore */
+  let left = $(leftId), right = $(rightId);
 
   let leftPos = findAbsolutePosition(left);
   let x1 = (leftPos.x += left.offsetWidth);
   let y1 = (leftPos.y += left.offsetHeight / 2);
 
   let rightPos = findAbsolutePosition(right);
-  let x2 = rightPos.x;
-  let y2 = (rightPos.y += right.offsetHeight / 2);
+  /* prettier-ignore */
+  let x2 = rightPos.x, y2 = (rightPos.y += right.offsetHeight / 2);
 
   let line = addElm('path');
 
