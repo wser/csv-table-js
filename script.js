@@ -1,7 +1,7 @@
-// (A) GET HTML TABLE
+//(A) GET HTML TABLE
 // let table = document.getElementById('demoTable');
 
-// (B) AJAX FETCH CSV FILE
+// //(B) AJAX FETCH CSV FILE
 // fetch('dummy.csv')
 //   .then((res) => {
 //     return res.text();
@@ -21,10 +21,137 @@
 //     }
 //   });
 
-function removeOldLine() {
-  var e = document.querySelectorAll('.removable');
-  e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
+/********************* */
+
+// function placeDiv(x_pos, y_pos) {
+//   var d = document.getElementById('box1');
+//   d.style.position = 'relative';
+//   d.style.left = x_pos + 'px';
+//   d.style.top = y_pos + 'px';
+// }
+
+/************* */
+/* TABLE Excle */
+// for (let i = 0; i < 6; i++) {
+//   var row = document.querySelector('table').insertRow(-1);
+//   for (var j = 0; j < 6; j++) {
+//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
+//     row.insertCell(-1).innerHTML =
+//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
+//   }
+// }
+
+// var DATA = {},
+//   INPUTS = [].slice.call(document.querySelectorAll('input'));
+// INPUTS.forEach((elm) => {
+//   elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
+
+//   elm.onblur = function (e) {
+//     localStorage[e.target.id] = e.target.value;
+//     computeAll();
+//   };
+//   var getter = function () {
+//     var value = localStorage[elm.id] || '';
+//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
+//     else return isNaN(parseFloat(value)) ? value : parseFloat(value);
+//   };
+//   Object.defineProperty(DATA, elm.id, { get: getter });
+//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
+// });
+// (window.computeAll = () => {
+//   INPUTS.forEach(function (elm) {
+//     try {
+//       elm.value = DATA[elm.id];
+//     } catch (e) {}
+//   });
+// })();
+
+/************* */
+
+/** DRAGGING */
+
+function draggable(container, handle) {
+  let movable = handle ? handle : container;
+  ['mousedown', 'touchstart'].forEach((event) => {
+    movable.addEventListener(
+      event,
+      (e) => {
+        e.preventDefault();
+        var offsetX = e.clientX - parseInt(getComputedStyle(container).left);
+        var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
+
+        function mouseMoveHandler(e) {
+          container.style.top = e.clientY - offsetY + 'px';
+          container.style.left = e.clientX - offsetX + 'px';
+        }
+
+        function reset() {
+          removeEventListener('mousemove', mouseMoveHandler);
+          removeEventListener('mouseup', reset);
+        }
+
+        addEventListener('mousemove', mouseMoveHandler);
+        addEventListener('mouseup', reset);
+      },
+      Modernizr.passiveeventlisteners ? { passive: true } : false
+    );
+  });
 }
+
+function touchHandler(event) {
+  /* prettier-ignore */
+  var touches = event.changedTouches, 
+    first = touches[0], 
+    type = '';
+  /* prettier-ignore */
+  switch(event.type){
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        default:           return;
+    }
+
+  // initMouseEvent(type, canBubble, cancelable, view, clickCount,
+  //                screenX, screenY, clientX, clientY, ctrlKey,
+  //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+  var simulatedEvent = document.createEvent('MouseEvent');
+  /* prettier-ignore */
+  simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+  first.target.dispatchEvent(simulatedEvent);
+  event.preventDefault();
+}
+
+/* implementation */
+
+const $ = (id) => document.querySelector(id);
+
+window.addEventListener('mouseup', runIt);
+window.addEventListener('touchend', runIt);
+
+window.addEventListener('load', (e) => {
+  runIt();
+  draggable($('#box1'));
+  draggable($('#box2'));
+  draggable($('#box3'));
+
+  document.addEventListener('touchstart', touchHandler, true);
+  document.addEventListener('touchmove', touchHandler, true);
+  document.addEventListener('touchend', touchHandler, true);
+  document.addEventListener('touchcancel', touchHandler, true);
+
+  const boxes = document.querySelectorAll('.box');
+  for (const box of boxes) {
+    box.addEventListener('mouseup', touchHandler);
+    box.addEventListener('mouseup', () => box.classList.toggle('active'));
+    box.addEventListener('touchend', touchHandler);
+    box.addEventListener('touchend', () => box.classList.toggle('active'));
+  }
+});
 
 function connectDivs(leftId, rightId, color, tension) {
   var left = document.querySelector(leftId);
@@ -46,6 +173,7 @@ function connectDivs(leftId, rightId, color, tension) {
 
   //drawCircle(x1, y1, 3, color);
   // drawCircle(x2, y2, 3, color);
+
   addDefs();
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 
@@ -162,126 +290,13 @@ function connectDivs(leftId, rightId, color, tension) {
   }
 }
 
-/********************* */
-
-// function placeDiv(x_pos, y_pos) {
-//   var d = document.getElementById('box1');
-//   d.style.position = 'relative';
-//   d.style.left = x_pos + 'px';
-//   d.style.top = y_pos + 'px';
-// }
-
-/************* */
-/* TABLE Excle */
-// for (let i = 0; i < 6; i++) {
-//   var row = document.querySelector('table').insertRow(-1);
-//   for (var j = 0; j < 6; j++) {
-//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-//     row.insertCell(-1).innerHTML =
-//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-//   }
-// }
-
-// var DATA = {},
-//   INPUTS = [].slice.call(document.querySelectorAll('input'));
-// INPUTS.forEach((elm) => {
-//   elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
-
-//   elm.onblur = function (e) {
-//     localStorage[e.target.id] = e.target.value;
-//     computeAll();
-//   };
-//   var getter = function () {
-//     var value = localStorage[elm.id] || '';
-//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-//     else return isNaN(parseFloat(value)) ? value : parseFloat(value);
-//   };
-//   Object.defineProperty(DATA, elm.id, { get: getter });
-//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
-// });
-// (window.computeAll = () => {
-//   INPUTS.forEach(function (elm) {
-//     try {
-//       elm.value = DATA[elm.id];
-//     } catch (e) {}
-//   });
-// })();
-
-/************* */
-
-/** DRAGGING */
-
-function draggable(container, handle) {
-  let movable = handle ? handle : container;
-  ['mousedown', 'touchstart'].forEach((event) => {
-    movable.addEventListener(event, (e) => {
-      var offsetX = e.clientX - parseInt(getComputedStyle(container).left);
-      var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
-
-      function mouseMoveHandler(e) {
-        container.style.top = e.clientY - offsetY + 'px';
-        container.style.left = e.clientX - offsetX + 'px';
-      }
-
-      function reset() {
-        removeEventListener('mousemove', mouseMoveHandler);
-        removeEventListener('mouseup', reset);
-      }
-
-      addEventListener('mousemove', mouseMoveHandler);
-      addEventListener('mouseup', reset);
-    });
-  });
+function removeOldLines() {
+  var e = document.querySelectorAll('.removable');
+  e.forEach((userItem) => userItem.parentNode.removeChild(userItem));
 }
-
-function touchHandler(event) {
-  /* prettier-ignore */
-  var touches = event.changedTouches, first = touches[0], type = '';
-  /* prettier-ignore */
-  switch(event.type){
-        case "touchstart": type = "mousedown"; break;
-        case "touchmove":  type = "mousemove"; break;        
-        case "touchend":   type = "mouseup";   break;
-        default:           return;
-    }
-
-  // initMouseEvent(type, canBubble, cancelable, view, clickCount,
-  //                screenX, screenY, clientX, clientY, ctrlKey,
-  //                altKey, shiftKey, metaKey, button, relatedTarget);
-
-  var simulatedEvent = document.createEvent('MouseEvent');
-  /* prettier-ignore */
-  simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-                                  first.screenX, first.screenY, 
-                                  first.clientX, first.clientY, false, 
-                                  false, false, false, 0/*left*/, null);
-
-  first.target.dispatchEvent(simulatedEvent);
-  event.preventDefault();
-}
-
-window.addEventListener('mouseup', runIt);
-window.addEventListener('touchend', runIt);
-
-window.addEventListener('load', (e) => {
-  runIt();
-  draggable(document.querySelector('#box1'));
-  draggable(document.querySelector('#box2'));
-  document.addEventListener('touchstart', touchHandler, true);
-  document.addEventListener('touchmove', touchHandler, true);
-  document.addEventListener('touchend', touchHandler, true);
-  document.addEventListener('touchcancel', touchHandler, true);
-  const boxes = document.querySelectorAll('.box');
-
-  for (const box of boxes) {
-    box.addEventListener('mouseup', touchHandler);
-    box.addEventListener('mouseup', () => box.classList.toggle('active'));
-    box.addEventListener('touchend', touchHandler);
-    box.addEventListener('touchend', () => box.classList.toggle('active'));
-  }
-});
 
 function runIt() {
-  removeOldLine();
-  connectDivs('#box2', '#box1', 'blue', 0.2);
+  removeOldLines();
+  connectDivs('#box1', '#box2', 'blue', 0.2);
+  connectDivs('#box2', '#box3', 'red', 0.2);
 }

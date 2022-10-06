@@ -15,15 +15,19 @@
   position: relative;
 }
 
+.box:hover {
+  cursor: grab;
+}
+
 .box:active {
-  cursor: move;
+  cursor: grabbing;
 }
 
 .active {
   border: 3px solid green !important;
 }
 
-/* #demoTable {
+#demoTable {
   border-collapse: collapse;
 }
 #demoTable tr:nth-child(odd) {
@@ -31,7 +35,7 @@
 }
 #demoTable td {
   padding: 10px;
-} */
+}
 
 #box1 {
   border: 1px solid blue;
@@ -39,6 +43,9 @@
 
 #box2 {
   border: 1px solid red;
+}
+#box3 {
+  border: 1px solid green;
 }
 
 /*TABLE*/
@@ -65,12 +72,3 @@ tr:first-child td,
 td:first-child { background-color: #ccc; padding: 1px 3px; font-weight: bold; text-align: center; }
 /* prettier-ignore */
 footer { font-size: 80%; }
-
-/* DRAGGING */
-#caree {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  background-color: black;
-  border-radius: 40px;
-}
