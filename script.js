@@ -20,12 +20,15 @@ function draggable(container, handle) {
           container.style.top = e.clientY - offsetY + 'px';
           container.style.left = e.clientX - offsetX + 'px';
           /* automatically add to local storage on move */
-          let offset = {
-            id: container.id,
-            left: container.style.left,
-            top: container.style.top,
-          };
-          local.set('w_divOffset', offset);
+          const arr = [];
+          for (box of boxes)
+            arr.push({
+              id: box.id,
+              left: box.style.left,
+              top: box.style.top,
+            });
+
+          local.set('w_divOffset', arr);
         }
 
         function reset() {
@@ -90,12 +93,19 @@ function init() {
     box.addEventListener('touchcancel', touchHandler, isPassive());
 
     let l = local.get('w_divOffset');
-    if (!l) local.set('w_divOffset', { id: '', left: '', top: '' });
+
+    if (!l) {
+      local.set('w_divOffset', [{}]);
+      init();
+    }
+
     // local storage
-    if (l.id == box.id) {
-      box.style.left = l.left;
-      box.style.top = l.top;
-      //check if local storage already has your offset. and set it
+    for (loc of l) {
+      if (loc.id == box.id) {
+        box.style.left = loc.left;
+        box.style.top = loc.top;
+        //check if local storage already has your offset. and set it
+      }
     }
 
     draggable(box); // make boxes draggable
