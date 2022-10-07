@@ -1,71 +1,3 @@
-//(A) GET HTML TABLE
-// let table = document.getElementById('demoTable');
-
-// //(B) AJAX FETCH CSV FILE
-// fetch('dummy.csv')
-//   .then((res) => {
-//     return res.text();
-//   })
-//   .then((csv) => {
-//     // (B1) REMOVE OLD TABLE ROWS
-//     table.innerHTML = '';
-
-//     // (B2) GENERATE TABLE
-//     csv = csv.split('\r\n');
-//     for (let row of csv) {
-//       let tr = table.insertRow();
-//       for (let col of row.split(',')) {
-//         let td = tr.insertCell();
-//         td.innerHTML = col;
-//       }
-//     }
-//   });
-
-/********************* */
-
-// function placeDiv(x_pos, y_pos) {
-//   var d = document.getElementById('box1');
-//   d.style.position = 'relative';
-//   d.style.left = x_pos + 'px';
-//   d.style.top = y_pos + 'px';
-// }
-
-/************* */
-/* TABLE Excle */
-// for (let i = 0; i < 6; i++) {
-//   var row = document.querySelector('table').insertRow(-1);
-//   for (var j = 0; j < 6; j++) {
-//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-//     row.insertCell(-1).innerHTML =
-//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-//   }
-// }
-
-// var DATA = {},
-//   INPUTS = [].slice.call(document.querySelectorAll('input'));
-// INPUTS.forEach((elm) => {
-//   elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
-
-//   elm.onblur = function (e) {
-//     localStorage[e.target.id] = e.target.value;
-//     computeAll();
-//   };
-//   var getter = function () {
-//     var value = localStorage[elm.id] || '';
-//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-//     else return isNaN(parseFloat(value)) ? value : parseFloat(value);
-//   };
-//   Object.defineProperty(DATA, elm.id, { get: getter });
-//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
-// });
-// (window.computeAll = () => {
-//   INPUTS.forEach(function (elm) {
-//     try {
-//       elm.value = DATA[elm.id];
-//     } catch (e) {}
-//   });
-// })();
-
 /************* */
 
 /** DRAG enabler*/
@@ -244,4 +176,21 @@ function runIt() {
   /* draw line between html elements */
   connectDivs('#box1', '#box2', 'blue', 0.2);
   connectDivs('#box1', '#box3', 'red', 0.2);
+  connectDivs('#box3', '#box4', 'red', 0.2);
 }
+
+/* local storage */
+function Local() {
+  return {
+    /* prettier-ignore*/
+    set: function (key, obj) { localStorage.setItem(key, JSON.stringify(obj)); return obj; },
+    /* prettier-ignore*/
+    get: function (key) { var obj = {};if (localStorage.getItem(key) !== 'undefined') obj = JSON.parse(localStorage.getItem(key));
+      return obj; },
+    /* prettier-ignore*/
+    clear: function () { localStorage.clear(); return this; },
+    /* prettier-ignore*/
+    remove: function (key) { localStorage.removeItem(key); return this; },
+  };
+}
+var local = Local();

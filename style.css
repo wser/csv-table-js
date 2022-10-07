@@ -11,43 +11,11 @@
 /* prettier-ignore */
 .active { border: 3px solid green !important; }
 
-/* #demoTable {
-  border-collapse: collapse;
-}
-#demoTable tr:nth-child(odd) {
-  background: #f2f2f2;
-}
-#demoTable td {
-  padding: 10px;
-} */
 /* prettier-ignore */
 #box1 { border: 1px solid blue; }
 /* prettier-ignore */
 #box2 { border: 1px solid red; }
 /* prettier-ignore */
 #box3 { border: 1px solid green; }
-
-/*TABLE*/
 /* prettier-ignore */
-li { list-style: none; }
-/* prettier-ignore */
-li:before { content: '✓ '; }
-/* prettier-ignore */
-#excelTable { position: absolute; width: auto; height: auto; }
-/* prettier-ignore */
-input { border: none; width: 80px; font-size: 14px; padding: 2px; }
-/* prettier-ignore */
-input:hover { background-color: #eee; }
-/* prettier-ignore */
-input:focus { background-color: #ccf; }
-/* prettier-ignore */
-input:not(:focus) { text-align: right; }
-/* prettier-ignore */
-table { border-collapse: collapse; position: relative; }
-/* prettier-ignore */
-td { border: 1px solid #999; padding: 0; }
-/* prettier-ignore */
-tr:first-child td,
-td:first-child { background-color: #ccc; padding: 1px 3px; font-weight: bold; text-align: center; }
-/* prettier-ignore */
-footer { font-size: 80%; }
+#box4 { border: 1px solid orange }
