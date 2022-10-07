@@ -1,4 +1,5 @@
 /************* */
+const local = Local();
 const boxes = document.querySelectorAll('.box');
 const $ = (id) => document.querySelector(id);
 const $$ = (c) => document.querySelectorAll(c);
@@ -16,10 +17,7 @@ function draggable(container, handle) {
         var offsetX = e.clientX - parseInt(getComputedStyle(container).left);
         var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
 
-        function mouseMoveHandler(e) {
-          container.style.top = e.clientY - offsetY + 'px';
-          container.style.left = e.clientX - offsetX + 'px';
-          /* automatically add to local storage on move */
+        function setLocalDataOnMove() {
           const arr = [];
           for (box of boxes)
             arr.push({
@@ -27,8 +25,14 @@ function draggable(container, handle) {
               left: box.style.left,
               top: box.style.top,
             });
-
           local.set('w_divOffset', arr);
+        }
+
+        function mouseMoveHandler(e) {
+          container.style.top = e.clientY - offsetY + 'px';
+          container.style.left = e.clientX - offsetX + 'px';
+          /* automatically add to local storage on move */
+          setLocalDataOnMove();
         }
 
         function reset() {
@@ -92,24 +96,26 @@ function init() {
     box.addEventListener('touchend', touchHandler, isPassive());
     box.addEventListener('touchcancel', touchHandler, isPassive());
 
+    //get local storage data by key
     let l = local.get('w_divOffset');
-
+    // if no local storage key exist, create it
     if (!l) {
       local.set('w_divOffset', [{}]);
       init();
     }
 
-    // local storage
+    // assign position values from local storage to elements
     for (loc of l) {
       if (loc.id == box.id) {
         box.style.left = loc.left;
         box.style.top = loc.top;
-        //check if local storage already has your offset. and set it
       }
     }
 
-    draggable(box); // make boxes draggable
+    // make boxes draggable
+    draggable(box);
 
+    // if element moving detect it and save state
     box.onmousedown = (e) => (mouseMoving = false);
     box.onmousemove = (e) => (mouseMoving = true);
 
@@ -193,16 +199,6 @@ function connectDivs(leftId, rightId, color, tension) {
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 }
 
-function runIt() {
-  /* remove old lines */
-  $$('.removable').forEach((e) => e.parentNode.removeChild(e));
-
-  /* draw line between html elements */
-  connectDivs('#box1', '#box2', 'blue', 0.2);
-  connectDivs('#box1', '#box3', 'red', 0.2);
-  connectDivs('#box3', '#box4', 'red', 0.2);
-}
-
 /* local storage */
 function Local() {
   return {
@@ -217,4 +213,15 @@ function Local() {
     remove: function (key) { localStorage.removeItem(key); return this; },
   };
 }
-var local = Local();
+
+function runIt() {
+  /* remove old lines */
+  $$('.removable').forEach((e) => e.parentNode.removeChild(e));
+
+  /* draw line between html elements */
+  connectDivs('#box1', '#box2', 'blue', 0.2);
+  connectDivs('#box1', '#box3', 'red', 0.2);
+  connectDivs('#box3', '#box4', 'red', 0.2);
+  connectDivs('#box2', '#box4', 'red', 0.2);
+  connectDivs('#box1', '#box4', 'green', 0.2);
+}
