@@ -1,4 +1,9 @@
 /************* */
+const boxes = document.querySelectorAll('.box');
+const $ = (id) => document.querySelector(id);
+const $$ = (c) => document.querySelectorAll(c);
+/* prettier-ignore */
+const isPassive = () => Modernizr.passiveeventlisteners ? { passive: true } : false;
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -14,6 +19,13 @@ function draggable(container, handle) {
         function mouseMoveHandler(e) {
           container.style.top = e.clientY - offsetY + 'px';
           container.style.left = e.clientX - offsetX + 'px';
+          /* automatically add to local storage on move */
+          let offset = {
+            id: container.id,
+            left: container.style.left,
+            top: container.style.top,
+          };
+          local.set('w_divOffset', offset);
         }
 
         function reset() {
@@ -61,12 +73,6 @@ function touchHandler(event) {
 
 /**************************************************************** */
 /* implementation */
-const boxes = document.querySelectorAll('.box');
-const $ = (id) => document.querySelector(id);
-const $$ = (c) => document.querySelectorAll(c);
-/* prettier-ignore */
-const isPassive = () => Modernizr.passiveeventlisteners ? { passive: true } : false;
-
 window.addEventListener('load', init); // on first load run init
 
 function init() {
@@ -82,6 +88,15 @@ function init() {
     box.addEventListener('touchmove', touchHandler, isPassive());
     box.addEventListener('touchend', touchHandler, isPassive());
     box.addEventListener('touchcancel', touchHandler, isPassive());
+
+    let l = local.get('w_divOffset');
+    if (!l) local.set('w_divOffset', { id: '', left: '', top: '' });
+    // local storage
+    if (l.id == box.id) {
+      box.style.left = l.left;
+      box.style.top = l.top;
+      //check if local storage already has your offset. and set it
+    }
 
     draggable(box); // make boxes draggable
 
@@ -99,14 +114,13 @@ function init() {
   // run other functions
   runIt();
 }
-
 function connectDivs(leftId, rightId, color, tension) {
   /* prettier-ignore */
   let left = $(leftId), right = $(rightId);
 
   let leftPos = findAbsolutePosition(left);
-  let x1 = (leftPos.x += left.offsetWidth);
-  let y1 = (leftPos.y += left.offsetHeight / 2);
+  /* prettier-ignore */
+  let x1 = (leftPos.x += left.offsetWidth), y1 = (leftPos.y += left.offsetHeight / 2);
 
   let rightPos = findAbsolutePosition(right);
   /* prettier-ignore */
