@@ -24,6 +24,8 @@ function Local() {
     remove: function (key) { localStorage.removeItem(key); return this; },
   };
 }
+let load = (key) => local.get(key);
+let save = (key, obj) => local.set(key, obj);
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -225,53 +227,84 @@ function runIt() {
   connectDivs('#box1', '#box4', 'green', 0.3);
 }
 
+var dataSet = load('w_Edata');
+
+dataSet = [];
+// dataSet.push({
+//   name: 'Dan Cruickshank',
+//   company: 'Fishtank',
+// });
+
+//save('w_Edata', dataSet);
+//console.log(dataSet);
+
 /* MAKE TABLE Excle */
-for (var i = 0; i < 6; i++) {
-  var row = $('#table2').insertRow(-1);
-  for (var j = 0; j < 6; j++) {
-    var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-    row.insertCell(-1).innerHTML =
-      i && j ? "<input id='" + letter + i + "'/>" : i || letter;
+for (let i = 0; i < 6; i++) {
+  let row = $('#table2').insertRow(-1);
+  for (let j = 0; j < 6; j++) {
+    let letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
+    /* prettier-ignore */
+    row.insertCell(-1).innerHTML = i && j ? "<input id='" + letter + i + "'/>" : i || letter;
   }
 }
 /** EXCEL enabler */
 /* prettier-ignore */
-let DATA = {}, INPUTS = [].slice.call($$('input'));
+let DATA = {}, INPUTS = [...$$('input')], arr = [];
 INPUTS.forEach((elm) => {
-  elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
   /* prettier-ignore */
-  elm.onblur = (e) => { localStorage[e.target.id] = e.target.value; computeAll(); };
+  elm.onfocus = (e) => { e.target.value = DATA[elm.id] || ''; };
+  // elm.onfocus = (e) => { e.target.value = localStorage[e.target.id] || ''; };
+  /* prettier-ignore */
+  elm.onblur = (e) => { save('w_Edata', arr); computeAll(); };
+  //elm.onblur = (e) => { localStorage[e.target.id] = e.target.value; computeAll(); };
   let getter = function () {
-    let value = localStorage[elm.id] || '';
+    //arr = load('w_Edata');
+    let value = DATA[elm.id] || '';
     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-    else return isNaN(parseFloat(value)) ? value : parseFloat(value);
+    else {
+      return isNaN(parseFloat(value)) ? value : parseFloat(value);
+    }
   };
   Object.defineProperty(DATA, elm.id, { get: getter });
   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
+
+  //local.set('w_Excel', arr);
 });
-/* prettier-ignore */
-let computeAll = () => INPUTS.forEach( (elm) => { try {elm.value = DATA[elm.id];} catch (e) {} });
+console.log(arr);
+
+/* prettier-ignore */ /* writes values to array */
+let computeAll = () => INPUTS.forEach( (elm) => { 
+  try { 
+    elm.value = DATA[elm.id]; 
+    let oneMore = { id: elm.id, value: elm.value };
+    var index = arr.findIndex((x) => x.id == elm.id);
+    index === -1 ? arr.push(oneMore) : console.log('object already exists');
+    arr.push(oneMore);    
+      
+  } catch (e) {} 
+});
+save('w_Edata', arr);
 computeAll();
 
 /** TABLE enabler */
 // (A) GET HTML TABLE
-let table = $('#demoTable');
+// let table = $('#demoTable');
 
-// (B) AJAX FETCH CSV FILE
-fetch('dummy.csv')
-  .then((res) => res.text())
-  .then((csv) => {
-    // (B1) REMOVE OLD TABLE ROWS
-    table.innerHTML = '';
+// // (B) AJAX FETCH CSV FILE
+// fetch('dummy.csv')
+//   .then((res) => res.text())
+//   .then((csv) => {
+//     // (B1) REMOVE OLD TABLE ROWS
+//     table.innerHTML = '';
 
-    // (B2) GENERATE TABLE
-    csv = csv.split('\r\n');
-    for (let [i, row] of csv.entries()) {
-      let tr = table.insertRow();
-      tr.id = i;
-      for (let [j, col] of row.split(',').entries()) {
-        let td = tr.insertCell();
-        td.innerHTML = col;
-      }
-    }
-  });
+//     // (B2) GENERATE TABLE
+//     csv = csv.split('\r\n');
+//     for (let [i, row] of csv.entries()) {
+//       let tr = table.insertRow();
+//       tr.id = i;
+//       for (let [j, col] of row.split(',').entries()) {
+//         let td = tr.insertCell();
+//         td.innerHTML = col;
+//       }
+//     }
+//   });
