@@ -1,10 +1,29 @@
+/*! modernizr 3.6.0 (Custom Build) | MIT *
+ * https://modernizr.com/download/?-passiveeventlisteners-setclasses !*/
+/* prettier-ignore */
+!function(e,n,s){function o(e,n){return typeof e===n}function a(){var e,n,s,a,t,f,l;for(var c in r)if(r.hasOwnProperty(c)){if(e=[],n=r[c],n.name&&(e.push(n.name.toLowerCase()),n.options&&n.options.aliases&&n.options.aliases.length))for(s=0;s<n.options.aliases.length;s++)e.push(n.options.aliases[s].toLowerCase());for(a=o(n.fn,"function")?n.fn():n.fn,t=0;t<e.length;t++)f=e[t],l=f.split("."),1===l.length?Modernizr[l[0]]=a:(!Modernizr[l[0]]||Modernizr[l[0]]instanceof Boolean||(Modernizr[l[0]]=new Boolean(Modernizr[l[0]])),Modernizr[l[0]][l[1]]=a),i.push((a?"":"no-")+l.join("-"))}}function t(e){var n=l.className,s=Modernizr._config.classPrefix||"";if(c&&(n=n.baseVal),Modernizr._config.enableJSClass){var o=new RegExp("(^|\\s)"+s+"no-js(\\s|$)");n=n.replace(o,"$1"+s+"js$2")}Modernizr._config.enableClasses&&(n+=" "+s+e.join(" "+s),c?l.className.baseVal=n:l.className=n)}var i=[],r=[],f={_version:"3.6.0",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(e,n){var s=this;setTimeout(function(){n(s[e])},0)},addTest:function(e,n,s){r.push({name:e,fn:n,options:s})},addAsyncTest:function(e){r.push({name:null,fn:e})}},Modernizr=function(){};Modernizr.prototype=f,Modernizr=new Modernizr;var l=n.documentElement,c="svg"===l.nodeName.toLowerCase();Modernizr.addTest("passiveeventlisteners",function(){var n=!1;try{var s=Object.defineProperty({},"passive",{get:function(){n=!0}});e.addEventListener("test",null,s)}catch(o){}return n}),a(),t(i),delete f.addTest,delete f.addAsyncTest;for(var u=0;u<Modernizr._q.length;u++)Modernizr._q[u]();e.Modernizr=Modernizr}(window,document);
+/**************************************************************** */
 /************* */
-const local = Local();
-const boxes = document.querySelectorAll('.box');
 const $ = (id) => document.querySelector(id);
 const $$ = (c) => document.querySelectorAll(c);
+const boxes = $$('.box');
+const local = Local();
 /* prettier-ignore */
 const isPassive = () => Modernizr.passiveeventlisteners ? { passive: true } : false;
+
+/* LOCAL storage */
+function Local() {
+  return {
+    /* prettier-ignore*/
+    set: function (key, obj) { localStorage.setItem(key, JSON.stringify(obj)); return obj; },
+    /* prettier-ignore*/
+    get: function (key) { var obj = {};if (localStorage.getItem(key) !== 'undefined') obj = JSON.parse(localStorage.getItem(key)); return obj; },
+    /* prettier-ignore*/
+    clear: function () { localStorage.clear(); return this; },
+    /* prettier-ignore*/
+    remove: function (key) { localStorage.removeItem(key); return this; },
+  };
+}
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -49,10 +68,6 @@ function draggable(container, handle) {
 }
 
 /** TOUCH enabler */
-/*! modernizr 3.6.0 (Custom Build) | MIT *
- * https://modernizr.com/download/?-passiveeventlisteners-setclasses !*/
-/* prettier-ignore */
-!function(e,n,s){function o(e,n){return typeof e===n}function a(){var e,n,s,a,t,f,l;for(var c in r)if(r.hasOwnProperty(c)){if(e=[],n=r[c],n.name&&(e.push(n.name.toLowerCase()),n.options&&n.options.aliases&&n.options.aliases.length))for(s=0;s<n.options.aliases.length;s++)e.push(n.options.aliases[s].toLowerCase());for(a=o(n.fn,"function")?n.fn():n.fn,t=0;t<e.length;t++)f=e[t],l=f.split("."),1===l.length?Modernizr[l[0]]=a:(!Modernizr[l[0]]||Modernizr[l[0]]instanceof Boolean||(Modernizr[l[0]]=new Boolean(Modernizr[l[0]])),Modernizr[l[0]][l[1]]=a),i.push((a?"":"no-")+l.join("-"))}}function t(e){var n=l.className,s=Modernizr._config.classPrefix||"";if(c&&(n=n.baseVal),Modernizr._config.enableJSClass){var o=new RegExp("(^|\\s)"+s+"no-js(\\s|$)");n=n.replace(o,"$1"+s+"js$2")}Modernizr._config.enableClasses&&(n+=" "+s+e.join(" "+s),c?l.className.baseVal=n:l.className=n)}var i=[],r=[],f={_version:"3.6.0",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(e,n){var s=this;setTimeout(function(){n(s[e])},0)},addTest:function(e,n,s){r.push({name:e,fn:n,options:s})},addAsyncTest:function(e){r.push({name:null,fn:e})}},Modernizr=function(){};Modernizr.prototype=f,Modernizr=new Modernizr;var l=n.documentElement,c="svg"===l.nodeName.toLowerCase();Modernizr.addTest("passiveeventlisteners",function(){var n=!1;try{var s=Object.defineProperty({},"passive",{get:function(){n=!0}});e.addEventListener("test",null,s)}catch(o){}return n}),a(),t(i),delete f.addTest,delete f.addAsyncTest;for(var u=0;u<Modernizr._q.length;u++)Modernizr._q[u]();e.Modernizr=Modernizr}(window,document);
 function touchHandler(event) {
   /* prettier-ignore */
   var touches = event.changedTouches, first = touches[0], type = '';
@@ -78,14 +93,13 @@ function touchHandler(event) {
   first.target.dispatchEvent(simulatedEvent);
 }
 
-/**************************************************************** */
 /* implementation */
 window.addEventListener('load', init); // on first load run init
 
 function init() {
   let mouseMoving = false;
   // attach event listeners to specific html elements
-  for (const box of boxes) {
+  for (let [i, box] of boxes.entries()) {
     const toggle = () => {
       if (!mouseMoving) box.classList.toggle('active');
     };
@@ -99,10 +113,8 @@ function init() {
     //get local storage data by key
     let l = local.get('w_divOffset');
     // if no local storage key exist, create it
-    if (!l) {
-      local.set('w_divOffset', [{}]);
-      init();
-    }
+    // prettier-ignore
+    if (!l) { local.set('w_divOffset', [{}]); init(); }
 
     // assign position values from local storage to elements
     for (loc of l) {
@@ -126,10 +138,12 @@ function init() {
     // on end of interaction redraw line
     box.addEventListener('mouseup', runIt);
     box.addEventListener('touchend', runIt);
+    box.innerHTML += i + 1;
   }
   // run other functions
   runIt();
 }
+
 function connectDivs(leftId, rightId, color, tension) {
   /* prettier-ignore */
   let left = $(leftId), right = $(rightId);
@@ -199,29 +213,14 @@ function connectDivs(leftId, rightId, color, tension) {
   drawCurvedLine(x1, y1, x2, y2, color, tension);
 }
 
-/* local storage */
-function Local() {
-  return {
-    /* prettier-ignore*/
-    set: function (key, obj) { localStorage.setItem(key, JSON.stringify(obj)); return obj; },
-    /* prettier-ignore*/
-    get: function (key) { var obj = {};if (localStorage.getItem(key) !== 'undefined') obj = JSON.parse(localStorage.getItem(key));
-      return obj; },
-    /* prettier-ignore*/
-    clear: function () { localStorage.clear(); return this; },
-    /* prettier-ignore*/
-    remove: function (key) { localStorage.removeItem(key); return this; },
-  };
-}
-
 function runIt() {
   /* remove old lines */
   $$('.removable').forEach((e) => e.parentNode.removeChild(e));
 
   /* draw line between html elements */
-  connectDivs('#box1', '#box2', 'blue', 0.2);
-  connectDivs('#box1', '#box3', 'red', 0.2);
-  connectDivs('#box3', '#box4', 'red', 0.2);
-  connectDivs('#box2', '#box4', 'red', 0.2);
-  connectDivs('#box1', '#box4', 'green', 0.2);
+  connectDivs('#box1', '#box2', 'blue', 0.3);
+  connectDivs('#box1', '#box3', 'red', 0.3);
+  connectDivs('#box3', '#box4', 'red', 0.3);
+  connectDivs('#box2', '#box4', 'red', 0.3);
+  connectDivs('#box1', '#box4', 'green', 0.3);
 }
