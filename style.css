@@ -20,3 +20,21 @@
 #box3 { border: 1px solid green; }
 /* prettier-ignore */
 #box4 { border: 1px solid orange }
+
+/* prettier-ignore */
+#table2 {padding: 2rem; width:25rem; height: auto;border-collapse: collapse; position: absolute;}
+/* prettier-ignore */
+#table2 input { border: none; width: 80px; font-size: 14px; padding: 2px; }
+/* prettier-ignore */
+#table2 input:hover { background-color: #eee; cursor: grab; }
+/* prettier-ignore */
+#table2 input:focus { background-color: #ccf; }
+/* prettier-ignore */
+#table2 input:not(:focus) { text-align: right; }
+/* prettier-ignore */
+#table2 td { border: 1px solid #999; padding: 0; }
+/* prettier-ignore */
+#table2 tr:first-child td,td:first-child { background-color: #ccc; padding: 1px 3px; 
+  font-weight: bold; text-align: center; }
+/* prettier-ignore */
+#table2 tr:nth-child(odd) { background: #f2f2f2; }
