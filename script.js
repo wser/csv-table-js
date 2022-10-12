@@ -236,31 +236,7 @@ function runIt() {
 //       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
 //   }
 // }
-// /** SET DATA input and helper objects */
-// let DATA = {}; // helper object
-// let INPUTS = [...$$('input')]; // all input fields in table
-// const obj = loadLS('w_Excel') || {}; // loadLS or make localStorrage key
-// const displayLSData = (e) => e.value = obj[e.id] || ''; // get value from LS for current element id
-// const processData = (e) => e.value = DATA[e.id]; // get procesed data
 
-// /** EXCEL enabler */
-// INPUTS.forEach((elm) => {
-//   displayLSData(elm) // display data from LS object
-//   elm.onfocus = (e) => { displayLSData(e.target)} // fill value inside cell/input with matched data
-//   elm.onblur = (e) => {
-//     obj[e.target.id] = e.target.value || ''; // write data to obj when focus changed
-//     processData(elm); // load all processed data  ofr each element
-//     saveLS('w_Excel', obj); // save obj value to local storage
-//   };
-//   let calc = function(){
-//     let value = obj[elm.id] || '';
-//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
-//     else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
-//   };
-
-//   Object.defineProperty(DATA, elm.id, { get: calc }); // process values
-//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
-// });
 
 /** TABLE enabler */
 // (A) GET HTML TABLE
@@ -272,18 +248,8 @@ fetch('dummy.csv')
   .then((csv) => {
     // (B1) REMOVE OLD TABLE ROWS
     table.innerHTML = '';
-
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
-
-    // for (var i = 0; i < 3; i++) {
-    //   var row = $('#table2').insertRow(-1);
-    //   for (var j = 0; j < 3; j++) {
-    //     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-    //     row.insertCell(-1).innerHTML =
-    //       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-    //   }
-    // }
 
     for (let [i, row] of csv.entries()) {
       let tr = table.insertRow(-1);
@@ -293,4 +259,32 @@ fetch('dummy.csv')
         td.innerHTML = i && j ? "<input id='" + letter + i + "'/>" : i || letter;
       }
     }
+  })
+  .then((data)=> {
+  /** SET DATA input and helper objects */
+  let DATA = {}; // helper object
+  let INPUTS = [...$$('td input')]; // all input fields in table
+  const obj = loadLS('w_Excel') || {}; // loadLS or make localStorrage key
+  const displayLSData = (e) => e.value = obj[e.id] || ''; // get value from LS for current element id
+  const processData = (e) => e.value = DATA[e.id]; // get procesed data
+
+  /** EXCEL enabler */
+  INPUTS.forEach((elm) => {
+    //elm.value = data.
+    displayLSData(elm) // display data from LS object
+    elm.onfocus = (e) => { displayLSData(e.target) } // fill value inside cell/input with matched data
+    elm.onblur = (e) => {
+      obj[e.target.id] = e.target.value || ''; // write data to obj when focus changed
+      processData(elm); // load all processed data  ofr each element
+      saveLS('w_Excel', obj); // save obj value to local storage
+    };
+    let calc = function(){
+      let value = obj[elm.id] || '';
+      if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
+      else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
+    };
+
+    Object.defineProperty(DATA, elm.id, { get: calc }); // process values
+    Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
   });
+})
