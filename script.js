@@ -24,8 +24,8 @@ function Local() {
     remove: function (key) { localStorage.removeItem(key); return this; },
   };
 }
-let load = (key) => local.get(key);
-let save = (key, obj) => local.set(key, obj);
+let loadLS = (key) => local.get(key);
+let saveLS = (key, obj) => local.set(key, obj);
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -46,7 +46,7 @@ function draggable(container, handle) {
               left: box.style.left,
               top: box.style.top,
             });
-          save('w_divOffset', arr);
+          saveLS('w_divOffset', arr);
         }
 
         function mouseMoveHandler(e) {
@@ -113,10 +113,10 @@ function init() {
     box.addEventListener('touchcancel', touchHandler, isPassive());
 
     //get local storage data by key
-    let l = load('w_divOffset');
+    let l = loadLS('w_divOffset');
     // if no local storage key exist, create it
     // prettier-ignore
-    if (!l) { save('w_divOffset', [{}]); init(); }
+    if (!l) { saveLS('w_divOffset', [{}]); init(); }
 
     // assign position values from local storage to elements
     for (loc of l) {
@@ -241,59 +241,30 @@ for (var i = 0; i < 3; i++) {
 
 let DATA = {}; // helper object
 let INPUTS = [...$$('input')]; // all input fields in table
-const obj = load('w_Excel') || {}; // load or make localStorrage key
+const obj = loadLS('w_Excel') || {}; // loadLS or make localStorrage key
 /* prettier-ignore */
-let computeAll = () => INPUTS.forEach(elm => {try {elm.value = DATA[elm.id];} catch (e) {}});
-
+let computeAll = () => INPUTS.forEach( (elm) => { try {elm.value = DATA[elm.id]} catch (e) {} });
 /** EXCEL enabler */
 INPUTS.forEach((elm) => {
-  elm.onfocus = (e) => (e.target.value = obj[e.target.id] || ''); // fill value inside cell/input with matched data
-  elm.onblur = (e) => {
-    obj[e.target.id] = e.target.value; // write data to LS when focus changed
-    computeAll(); // spin the obj, add data
-    save('w_Excel', obj); // save value to local storage
-  };
-  let getter = () => {
-    let value = obj[elm.id] || ''; //get value from LS for current element
-    if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
-    else return isNaN(parseFloat(value)) ? value : parseFloat(value); // display value or integer
-  };
+    let value = obj[elm.id] || ''; //get value from LS for current element id
+    elm.value = value;
+    elm.onfocus = (e) => e.target.value = obj[e.target.id] || '' // fill value inside cell/input with matched data
+    elm.onblur = (e) => {
+      obj[e.target.id] = e.target.value; // write data to obj when focus changed
+      elm.value = DATA[elm.id]; // process entered value to DATA object through calculation
+      computeAll(); // load all processed data ofr each element
+      saveLS('w_Excel', obj); // save obj value to local storage
+    };
+    let calc = () => {      
+      if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
+      else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
+    };
 
-  Object.defineProperty(DATA, elm.id, { get: getter });
-  Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
+    Object.defineProperty(DATA, elm.id, { get: calc }); // process values
+    Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
+
 });
 
-computeAll();
-
-/*** ORIGINAL
- */
-
-//  for (var i = 0; i < 6; i++) {
-//   var row = $('#table2').insertRow(-1);
-//   for (var j = 0; j < 6; j++) {
-//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-//     row.insertCell(-1).innerHTML =
-//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-//   }
-// }
-// /** EXCEL enabler */
-// /* prettier-ignore */
-// let DATA = {}, INPUTS = [].slice.call($$('input'));
-// INPUTS.forEach((elm) => {
-//   elm.onfocus = (e) => (e.target.value = localStorage[e.target.id] || '');
-//   /* prettier-ignore */
-//   elm.onblur = (e) => { localStorage[e.target.id] = e.target.value; computeAll(); };
-//   let getter = function () {
-//     let value = localStorage[elm.id] || '';
-//     if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-//     else return isNaN(parseFloat(value)) ? value : parseFloat(value);
-//   };
-//   Object.defineProperty(DATA, elm.id, { get: getter });
-//   Object.defineProperty(DATA, elm.id.toLowerCase(), { get: getter });
-// });
-// /* prettier-ignore */
-// let computeAll = () => INPUTS.forEach( (elm) => { try {elm.value = DATA[elm.id];} catch (e) {} });
-// computeAll();
 
 /** TABLE enabler */
 // (A) GET HTML TABLE
