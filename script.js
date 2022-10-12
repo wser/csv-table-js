@@ -39,14 +39,14 @@ function draggable(container, handle) {
         var offsetY = e.clientY - parseInt(getComputedStyle(container).top);
 
         function setLocalDataOnMove() {
-          const arr = [];
+          let arr = [];
           for (box of boxes)
             arr.push({
               id: box.id,
               left: box.style.left,
               top: box.style.top,
             });
-          local.set('w_divOffset', arr);
+          save('w_divOffset', arr);
         }
 
         function mouseMoveHandler(e) {
@@ -113,10 +113,10 @@ function init() {
     box.addEventListener('touchcancel', touchHandler, isPassive());
 
     //get local storage data by key
-    let l = local.get('w_divOffset');
+    let l = load('w_divOffset');
     // if no local storage key exist, create it
     // prettier-ignore
-    if (!l) { local.set('w_divOffset', [{}]); init(); }
+    if (!l) { save('w_divOffset', [{}]); init(); }
 
     // assign position values from local storage to elements
     for (loc of l) {
@@ -238,50 +238,25 @@ for (var i = 0; i < 3; i++) {
       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
   }
 }
+
+let DATA = {}; // helper object
+let INPUTS = [...$$('input')]; // all input fields in table
+const obj = load('w_Excel') || {}; // load or make localStorrage key
 /* prettier-ignore */
-let DATA = {}, INPUTS = [...$$('input')], oneMore;
-
-const obj = {};
-const lsObj = load('w_Excel');
-
-let computeAll = () =>
-  INPUTS.forEach((elm, i) => {
-    try {
-      elm.value = DATA[elm.id];
-
-      //oneMore = { id: elm.id, value: elm.value };
-      //obj[i] = { ...oneMore }; // fill the object with data from inputs
-    } catch (e) {}
-  });
-
-// /* prettier-ignore */
-// let items = load('w_Excel'), arr = [], arr2 = [];
-// let item = Object.entries(items).forEach(([key, value]) => {
-//   arr.push(value);
-//   arr2.push(arr[key].id);
-// });
-// console.log(arr);
+let computeAll = () => INPUTS.forEach(elm => {try {elm.value = DATA[elm.id];} catch (e) {}});
 
 /** EXCEL enabler */
-INPUTS.forEach((elm, i) => {
-  elm.onfocus = (e) => {
-    //console.log(lsObj);
-    e.target.value = localStorage[e.target.id] || ''; // write value inside cell/input
-  };
-  /* prettier-ignore */
-  elm.onblur = (e) => { 
-    //localStorage[e.target.id] = e.target.value;    
-    oneMore = { id: e.target.id, value: e.target.value };
-    obj[i] = { ...oneMore }; // fill the object with data from inputs   
-    //computeAll(); // spin the obj, add data
-    save('w_Excel', obj);// save value to local storage
+INPUTS.forEach((elm) => {
+  elm.onfocus = (e) => (e.target.value = obj[e.target.id] || ''); // fill value inside cell/input with matched data
+  elm.onblur = (e) => {
+    obj[e.target.id] = e.target.value; // write data to LS when focus changed
+    computeAll(); // spin the obj, add data
+    save('w_Excel', obj); // save value to local storage
   };
   let getter = () => {
-    // let value = localStorage[elm.id] || '';
-    eval(lsObj[elm.id].substring(1)) || '';
-    //let value = elm.value || '';
-    // if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1));
-    // else return isNaN(parseFloat(value)) ? value : parseFloat(value);
+    let value = obj[elm.id] || ''; //get value from LS for current element
+    if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
+    else return isNaN(parseFloat(value)) ? value : parseFloat(value); // display value or integer
   };
 
   Object.defineProperty(DATA, elm.id, { get: getter });
