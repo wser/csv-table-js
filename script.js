@@ -102,9 +102,7 @@ function init() {
   let mouseMoving = false;
   // attach event listeners to specific html elements
   for (let [i, box] of boxes.entries()) {
-    const toggle = () => {
-      if (!mouseMoving) box.classList.toggle('active');
-    };
+    const toggle = () => { if (!mouseMoving) box.classList.toggle('active'); };
 
     // attach touch/mouse handler to boxes
     box.addEventListener('touchstart', touchHandler, isPassive());
@@ -114,17 +112,13 @@ function init() {
 
     //get local storage data by key
     let l = loadLS('w_divOffset');
-    // if no local storage key exist, create it
+    
     // prettier-ignore
-    if (!l) { saveLS('w_divOffset', [{}]); init(); }
+    if (!l) { saveLS('w_divOffset', [{}]); init(); } // if no local storage key exist, create it
 
     // assign position values from local storage to elements
-    for (loc of l) {
-      if (loc.id == box.id) {
-        box.style.left = loc.left;
-        box.style.top = loc.top;
-      }
-    }
+    for (loc of l) 
+      if (loc.id == box.id) { box.style.left = loc.left; box.style.top = loc.top; }
 
     // make boxes draggable
     draggable(box);
@@ -227,9 +221,8 @@ function runIt() {
   connectDivs('#box1', '#box4', 'green', 0.3);
 }
 
-/*** ORIGINAL
- */
-
+/*** EXCEL */
+/** MAKE TABLE */
 for (var i = 0; i < 3; i++) {
   var row = $('#table2').insertRow(-1);
   for (var j = 0; j < 3; j++) {
@@ -238,31 +231,31 @@ for (var i = 0; i < 3; i++) {
       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
   }
 }
-
+/** SET DATA input and helper objects */
 let DATA = {}; // helper object
 let INPUTS = [...$$('input')]; // all input fields in table
 const obj = loadLS('w_Excel') || {}; // loadLS or make localStorrage key
-/* prettier-ignore */
-let computeAll = () => INPUTS.forEach( (elm) => { try {elm.value = DATA[elm.id]} catch (e) {} });
+const displayLSData = (e) => e.value = obj[e.id] || ''; // get value from LS for current element id
+const processData = (e) => e.value = DATA[e.id]; // get procesed data
+
 /** EXCEL enabler */
 INPUTS.forEach((elm) => {
-    let value = obj[elm.id] || ''; //get value from LS for current element id
-    elm.value = value;
-    elm.onfocus = (e) => e.target.value = obj[e.target.id] || '' // fill value inside cell/input with matched data
-    elm.onblur = (e) => {
-      obj[e.target.id] = e.target.value; // write data to obj when focus changed
-      elm.value = DATA[elm.id]; // process entered value to DATA object through calculation
-      computeAll(); // load all processed data ofr each element
-      saveLS('w_Excel', obj); // save obj value to local storage
-    };
-    let calc = () => {      
-      if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
-      else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
-    };
+  $$('input').addEventListener("input", processData(elm));
+  displayLSData(elm) // display data from LS object
+  elm.onfocus = (e) => { displayLSData(e.target)} // fill value inside cell/input with matched data
+  elm.onblur = (e) => {
+    obj[e.target.id] = e.target.value || ''; // write data to obj when focus changed
+    processData(elm); // load all processed data  ofr each element
+    saveLS('w_Excel', obj); // save obj value to local storage
+  };
+  let calc = function(){   
+    let value = obj[elm.id] || '';    
+    if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
+    else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
+  };
 
-    Object.defineProperty(DATA, elm.id, { get: calc }); // process values
-    Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
-
+  Object.defineProperty(DATA, elm.id, { get: calc }); // process values
+  Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
 });
 
 
