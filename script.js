@@ -228,14 +228,6 @@ function runIt() {
   toCSV(tableData)
 }
 
-/** EXPORT TO CSV */
-function handleClick(){
-  let q = 'Proceed with action?'; 
-  confirm(q) == true ? exportL() : false;
-}
-
-function exportL(){ exportData(toCSV(l)) }
-
 
 /** TABLE enabler */
 // (A) GET HTML TABLE
@@ -250,6 +242,7 @@ fetch('dummy.csv')
     table.innerHTML = '';
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
+    let arr = []
     for (const [i, row] of csv.entries()) { //rows
       let tr = table.insertRow(-1); // Insert a row at the end of the table
       for (const [j, col] of row.split(',').entries()) { //columns
@@ -259,11 +252,11 @@ fetch('dummy.csv')
         td.innerHTML = i && j // check if true / everything with 0 is false
           ? `<input id='${cellId}' placeholder='${col}'/>` // if true add input with id
           : i || letter; // if false add letter to first row, then firstly row num       
-      
-      
-        tableData[i] = {id: i, letter:j} //create object for export      
-        }
+        arr.push(col)
+        tableData[i] = { id: i, A: arr[i]}  
+        }    
     }
+    console.log(arr)
   })
   .then((data) => {
     
@@ -297,6 +290,9 @@ fetch('dummy.csv')
   })
 
 
+/** EXPORT TO CSV */
+function handleClick(){let q = 'Proceed with action?'; confirm(q) == true ? exportL() : false;}
+
 function toCSV(o){
   const items = o;
   const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
@@ -317,6 +313,4 @@ function exportData(csvContent){
   element.click(); 
 }
 
-
-
-  
+function exportL(){ exportData(toCSV(tableData)) }
