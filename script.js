@@ -224,11 +224,23 @@ function runIt() {
   connectDivs('#box3', '#box4', 'red', 0.3);
   connectDivs('#box2', '#box4', 'red', 0.3);
   connectDivs('#box1', '#box4', 'green', 0.3);
+
+  toCSV(tableData)
 }
+
+/** EXPORT TO CSV */
+function handleClick(){
+  let q = 'Proceed with action?'; 
+  confirm(q) == true ? exportL() : false;
+}
+
+function exportL(){ exportData(toCSV(l)) }
+
 
 /** TABLE enabler */
 // (A) GET HTML TABLE
 let table = $('#table2');
+let tableData = [{}];
 
 // (B) AJAX FETCH CSV FILE
 fetch('dummy.csv')
@@ -238,20 +250,20 @@ fetch('dummy.csv')
     table.innerHTML = '';
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
-    data = []
     for (const [i, row] of csv.entries()) { //rows
       let tr = table.insertRow(-1); // Insert a row at the end of the table
       for (const [j, col] of row.split(',').entries()) { //columns
-        data.push(col)
         let letter = String.fromCharCode('A'.charCodeAt(0) + j - 1); //returns a string created from the specified sequence of UTF-16 code units
         let cellId = letter + i 
         let td = tr.insertCell(-1); // Insert a cell in the row at end of the row
-        td.innerHTML = i && j// check if true / everything with 0 is false
+        td.innerHTML = i && j // check if true / everything with 0 is false
           ? `<input id='${cellId}' placeholder='${col}'/>` // if true add input with id
           : i || letter; // if false add letter to first row, then firstly row num       
-      }
+      
+      
+        tableData[i] = {id: i, letter:j} //create object for export      
+        }
     }
-    return data
   })
   .then((data) => {
     
@@ -261,10 +273,9 @@ fetch('dummy.csv')
     const obj = loadLS('w_Excel') || {}; // load localStorage data to object
     const displayLSData = (e) => e.value = obj[e.id] || ''; // get value from LS for current element id
     const processData = (e) => e.value = DATA[e.id]; // get procesed data
-    console.log(obj)
+    
     /** EXCEL enabler */
-    INPUTS.forEach((elm,i ) => {
-     // obj[elm.id]=data[i]
+    INPUTS.forEach((elm) => {
       displayLSData(elm) // display data from LS object
       elm.onfocus = (e) => { displayLSData(e.target) } // fill value inside cell/input with matched data
       elm.onblur = (e) => {
@@ -281,38 +292,31 @@ fetch('dummy.csv')
       Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
     });
     /** Process all data in another loop to initialy display result*/
-    INPUTS.forEach( (elm) => { try {processData(elm)} catch (e) {} });
-
-    
+    INPUTS.forEach((elm, i) => {try {processData(elm)} catch (e) {} })
+    //console.log(tableData)
   })
 
-function handleClick(){
-  let q = 'Proceed with action?'; confirm(q) == true ? exportL() : e.preventDefault();
+
+function toCSV(o){
+  const items = o;
+  const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+  const header = Object.keys(items[0])
+  const csv = [
+    header.join(','), // header row first
+    ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+  ].join('\r\n')
+  console.log(csv)
+  return csv;  
 }
 
-function exportL(){ exportJSONToCSV(l) }
-
-function exportJSONToCSV(objArray) {
-  var arr = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
-  var str =
-    `${Object.keys(arr[0])
-      .map((value) => `"${value}"`)
-      .join(',')}` + '\r\n';
-  var csvContent = arr.reduce((st, next) => {
-    st +=
-      `${Object.values(next)
-        .map((value) => `"${value}"`)
-        .join(',')}` + '\r\n';
-    return st;
-  }, str);
-
+function exportData(csvContent){
   var element = document.createElement('a');
   element.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent);
   element.target = '_blank';
   element.download = 'export.csv';
-  element.click();
-  
+  element.click(); 
 }
+
 
 
   

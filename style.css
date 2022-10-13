@@ -22,7 +22,7 @@
 #box4 { border: 1px solid orange }
 
 /* prettier-ignore */
-#table2 {padding: 2rem; width:25rem; height: auto;border-collapse: collapse; position: absolute;}
+#table2 {margin-left:2rem; padding: 2rem; width:15rem; height: auto;border-collapse: collapse; position: absolute;}
 /* prettier-ignore */
 #table2 input { border: none; width: 80px; font-size: 14px; padding: 2px; }
 /* prettier-ignore */
