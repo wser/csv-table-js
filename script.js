@@ -27,6 +27,9 @@ function Local() {
 let loadLS = (key) => local.get(key);
 let saveLS = (key, obj) => local.set(key, obj);
 
+let l = loadLS('w_divOffset'); //get local storage data by key
+
+
 /** DRAG enabler*/
 function draggable(container, handle) {
   let movable = handle ? handle : container;
@@ -111,10 +114,7 @@ function init() {
     box.addEventListener('touchmove', touchHandler, isPassive());
     box.addEventListener('touchend', touchHandler, isPassive());
     box.addEventListener('touchcancel', touchHandler, isPassive());
-
-    //get local storage data by key
-    let l = loadLS('w_divOffset');
-
+   
     // prettier-ignore
     if (!l) { saveLS('w_divOffset', [{}]); init(); } // if no local storage key exist, create it
 
@@ -142,7 +142,7 @@ function init() {
     box.innerHTML += i + 1;
   }
   // run other functions
-  runIt();
+  runIt();  
 }
 
 function connectDivs(leftId, rightId, color, tension) {
@@ -226,18 +226,6 @@ function runIt() {
   connectDivs('#box1', '#box4', 'green', 0.3);
 }
 
-/*** EXCEL */
-/** MAKE TABLE */
-// for (var i = 0; i < 3; i++) {
-//   var row = $('#table2').insertRow(-1);
-//   for (var j = 0; j < 3; j++) {
-//     var letter = String.fromCharCode('A'.charCodeAt(0) + j - 1);
-//     row.insertCell(-1).innerHTML =
-//       i && j ? "<input id='" + letter + i + "'/>" : i || letter;
-//   }
-// }
-
-
 /** TABLE enabler */
 // (A) GET HTML TABLE
 let table = $('#table2');
@@ -250,44 +238,81 @@ fetch('dummy.csv')
     table.innerHTML = '';
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
-
-    for (let [i, row] of csv.entries()) {
+    data = []
+    for (const [i, row] of csv.entries()) { //rows
       let tr = table.insertRow(-1); // Insert a row at the end of the table
-      for (let [j, col] of row.split(',').entries()) {
+      for (const [j, col] of row.split(',').entries()) { //columns
+        data.push(col)
         let letter = String.fromCharCode('A'.charCodeAt(0) + j - 1); //returns a string created from the specified sequence of UTF-16 code units
         let cellId = letter + i 
         let td = tr.insertCell(-1); // Insert a cell in the row at end of the row
-        td.innerHTML = i && j // check if true / everything with 0 is false
+        td.innerHTML = i && j// check if true / everything with 0 is false
           ? `<input id='${cellId}' placeholder='${col}'/>` // if true add input with id
-          : i || letter; // if false add letter to first row, then firstly row num 
-        
+          : i || letter; // if false add letter to first row, then firstly row num       
       }
     }
-
+    return data
+  })
+  .then((data) => {
+    
     /** SET DATA input and helper objects */
-    let DATA = {}; // helper object
+    let DATA = {}; // processed data object
     let INPUTS = [...$$('input')]; // all input fields in table
-    const obj = loadLS('w_Excel') || {}; // loadLS or make localStorrage key
+    const obj = loadLS('w_Excel') || {}; // load localStorage data to object
     const displayLSData = (e) => e.value = obj[e.id] || ''; // get value from LS for current element id
     const processData = (e) => e.value = DATA[e.id]; // get procesed data
-
+    console.log(obj)
     /** EXCEL enabler */
-    INPUTS.forEach((elm) => {
-      //elm.value = data.
+    INPUTS.forEach((elm,i ) => {
+     // obj[elm.id]=data[i]
       displayLSData(elm) // display data from LS object
       elm.onfocus = (e) => { displayLSData(e.target) } // fill value inside cell/input with matched data
       elm.onblur = (e) => {
         obj[e.target.id] = e.target.value || ''; // write data to obj when focus changed
-        processData(elm); // load all processed data  ofr each element
-        saveLS('w_Excel', obj); // save obj value to local storage
+        processData(elm); // load all processed data for each element
+        saveLS('w_Excel', obj); // save obj values to local storage
       };
       let calc = function(){
-        let value = obj[elm.id] || '';
+        let value = obj[elm.id] || ''; // get object value of blank
         if (value.charAt(0) == '=') with (DATA) return eval(value.substring(1)); // calculate if string starts with '='
         else return isNaN(parseFloat(value)) ? value : parseFloat(value); // return value or integer
       };
-
       Object.defineProperty(DATA, elm.id, { get: calc }); // process values
       Object.defineProperty(DATA, elm.id.toLowerCase(), { get: calc });
     });
+    /** Process all data in another loop to initialy display result*/
+    INPUTS.forEach( (elm) => { try {processData(elm)} catch (e) {} });
+
+    
   })
+
+function handleClick(){
+  let q = 'Proceed with action?'; confirm(q) == true ? exportL() : e.preventDefault();
+}
+
+function exportL(){ exportJSONToCSV(l) }
+
+function exportJSONToCSV(objArray) {
+  var arr = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+  var str =
+    `${Object.keys(arr[0])
+      .map((value) => `"${value}"`)
+      .join(',')}` + '\r\n';
+  var csvContent = arr.reduce((st, next) => {
+    st +=
+      `${Object.values(next)
+        .map((value) => `"${value}"`)
+        .join(',')}` + '\r\n';
+    return st;
+  }, str);
+
+  var element = document.createElement('a');
+  element.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvContent);
+  element.target = '_blank';
+  element.download = 'export.csv';
+  element.click();
+  
+}
+
+
+  

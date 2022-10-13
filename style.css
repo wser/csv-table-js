@@ -39,14 +39,8 @@
 /* prettier-ignore */
 #table2 tr:nth-child(odd) { background: #f2f2f2; }
 
-#demoTable {
-  width: 25rem;
+#export {
+  width: 200px;
   height: auto;
-  border-collapse: collapse;
-}
-#demoTable tr:nth-child(odd) {
-  background: #f2f2f2;
-}
-#demoTable td {
-  padding: 10px;
+  margin-bottom: 2rem;
 }
