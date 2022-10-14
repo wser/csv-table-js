@@ -29,6 +29,7 @@ let saveLS = (key, obj) => local.set(key, obj);
 
 let l = loadLS('w_divOffset'); //get local storage data by key
 let mouseMoving = false;
+let t2arr;
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -238,7 +239,7 @@ function runIt() {
 /** TABLE enabler */
 // (A) GET HTML TABLE
 let table = $('#table2');
-let tableData = [{}];
+
 
 function tableToArray(tbl, opt_cellValueGetter) {
   opt_cellValueGetter = opt_cellValueGetter || function(td) { return td.textContent || td.innerText; };
@@ -263,8 +264,6 @@ function tableToArray(tbl, opt_cellValueGetter) {
   return twoD;
 }
 
-
-
 // (B) AJAX FETCH CSV FILE
 fetch('dummy.csv')
   .then((res) => res.text())
@@ -273,7 +272,7 @@ fetch('dummy.csv')
     table.innerHTML = '';
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
-    let arr = [[]]
+    //let arr = [[]]
     for (const [i, row] of csv.entries()) { //rows
       let tr = table.insertRow(-1); // Insert a row at the end of the table
       let rowsData = row.split(',').entries()
@@ -284,12 +283,9 @@ fetch('dummy.csv')
         td.innerHTML = i && j // check if true / everything with 0 is false
           ? `<input id='${cellId}' placeholder='${col}'/>` // if true add input with id
           : i || letter; // if false add letter to first row, then firstly row num
-        arr.push([i,col])
+        //arr.push([i,col])
       }    
     }
-    let t2arr = tableToArray(table)
-    console.log(t2arr)
-
   })
   .then((data) => {
     
@@ -319,7 +315,9 @@ fetch('dummy.csv')
     });
     /** Process all data in another loop to initialy display result*/
     INPUTS.forEach((elm, i) => {try {processData(elm)} catch (e) {} })
-    //console.log(tableData)
+    
+    t2arr = tableToArray(table)
+    console.log(t2arr)
   })
 
 function getEveryNth(arr, nth) {
@@ -351,3 +349,23 @@ function exportData(csvContent){
 }
 
 function exportL(){ exportData(toCSV(tableData)) }
+
+//console.log(tableData)
+
+
+function makeTableHTML(ar) {
+  return `<table>${ar.reduce((c, o) => c += `<tr>${o.reduce((c, d) => (c += `<td>${d}</td>`), '')}</tr>`, '')}</table>`
+}
+
+
+
+function pureFunctionalTable ( data ){ 
+    [document.createElement('table')].filter(table => !table.appendChild(
+        data.reduce((tbody, row) =>
+            !tbody.appendChild(row.reduce((tr, cell) =>
+                !tr.appendChild(document.createElement('td'))
+                   .appendChild(document.createTextNode(cell)) || tr
+                , document.createElement('tr'))
+            ) || tbody, document.createElement('tbody'))) || table)[0];}
+
+document.body.appendChild(pureFunctionalTable(t2arr))
