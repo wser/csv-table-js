@@ -28,7 +28,7 @@ let loadLS = (key) => local.get(key);
 let saveLS = (key, obj) => local.set(key, obj);
 
 let l = loadLS('w_divOffset'); //get local storage data by key
-
+let mouseMoving = false;
 
 /** DRAG enabler*/
 function draggable(container, handle) {
@@ -98,43 +98,47 @@ function touchHandler(event) {
   first.target.dispatchEvent(simulatedEvent);
 }
 
+function addTouchListeners(element){
+  // attach touch/mouse handler to boxes
+  element.addEventListener('touchstart', touchHandler, isPassive());
+  element.addEventListener('touchmove', touchHandler, isPassive());
+  element.addEventListener('touchend', touchHandler, isPassive());
+  element.addEventListener('touchcancel', touchHandler, isPassive());
+}
+
+function toggleActiveClass(element){
+  const toggle = () => { if (!mouseMoving) element.classList.toggle('active'); };
+  // toggle active css class
+  element.addEventListener('mouseup', toggle);
+  element.addEventListener('touchend', toggle);
+}
+
 /* implementation */
 window.addEventListener('load', init); // on first load run init
 
 function init() {
-  let mouseMoving = false;
   // attach event listeners to specific html elements
   for (let [i, box] of boxes.entries()) {
-    const toggle = () => {
-      if (!mouseMoving) box.classList.toggle('active');
-    };
 
-    // attach touch/mouse handler to boxes
-    box.addEventListener('touchstart', touchHandler, isPassive());
-    box.addEventListener('touchmove', touchHandler, isPassive());
-    box.addEventListener('touchend', touchHandler, isPassive());
-    box.addEventListener('touchcancel', touchHandler, isPassive());
-   
-    // prettier-ignore
     if (!l) { saveLS('w_divOffset', [{}]); init(); } // if no local storage key exist, create it
 
     // assign position values from local storage to elements
-    for (loc of l)
+    for (loc of l){
       if (loc.id == box.id) {
         box.style.left = loc.left;
         box.style.top = loc.top;
       }
+    }
 
-    // make boxes draggable
-    draggable(box);
+    addTouchListeners(box)
+
+    draggable(box)
 
     // if element moving detect it and save state
-    box.onmousedown = (e) => (mouseMoving = false);
-    box.onmousemove = (e) => (mouseMoving = true);
+    box.addEventListener('mousedown', (e) => (mouseMoving = false))
+    box.addEventListener('mousemove', (e) => (mouseMoving = true))
 
-    // toggle active css class
-    box.addEventListener('mouseup', toggle);
-    box.addEventListener('touchend', toggle);
+    toggleActiveClass(box)    
 
     // on end of interaction redraw line
     box.addEventListener('mouseup', runIt);
@@ -218,6 +222,8 @@ function runIt() {
   /* remove old lines */
   $$('.removable').forEach((e) => e.parentNode.removeChild(e));
 
+  boxes.forEach(e=> e.classList.contains('active'))
+
   /* draw line between html elements */
   connectDivs('#box1', '#box2', 'blue', 0.3);
   connectDivs('#box1', '#box3', 'red', 0.3);
@@ -225,7 +231,7 @@ function runIt() {
   connectDivs('#box2', '#box4', 'red', 0.3);
   connectDivs('#box1', '#box4', 'green', 0.3);
 
-  toCSV(tableData)
+  //toCSV(tableData)
 }
 
 
@@ -233,6 +239,31 @@ function runIt() {
 // (A) GET HTML TABLE
 let table = $('#table2');
 let tableData = [{}];
+
+function tableToArray(tbl, opt_cellValueGetter) {
+  opt_cellValueGetter = opt_cellValueGetter || function(td) { return td.textContent || td.innerText; };
+  var twoD = [];
+  for (var rowCount = tbl.rows.length, rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    twoD.push([]);
+  }
+  for (var rowIndex = 0, tr; rowIndex < rowCount; rowIndex++) {
+    var tr = tbl.rows[rowIndex];
+    for (var colIndex = 0, colCount = tr.cells.length, offset = 0; colIndex < colCount; colIndex++) {
+      var td = tr.cells[colIndex], text = opt_cellValueGetter(td, colIndex, rowIndex, tbl);
+      while (twoD[rowIndex].hasOwnProperty(colIndex + offset)) {
+        offset++;
+      }
+      for (var i = 0, colSpan = parseInt(td.colSpan, 10) || 1; i < colSpan; i++) {
+        for (var j = 0, rowSpan = parseInt(td.rowSpan, 10) || 1; j < rowSpan; j++) {
+          twoD[rowIndex + j][colIndex + offset + i] = text;
+        }
+      }
+    }
+  }
+  return twoD;
+}
+
+
 
 // (B) AJAX FETCH CSV FILE
 fetch('dummy.csv')
@@ -242,21 +273,23 @@ fetch('dummy.csv')
     table.innerHTML = '';
     // (B2) GENERATE TABLE
     csv = csv.split('\r\n');
-    let arr = []
+    let arr = [[]]
     for (const [i, row] of csv.entries()) { //rows
       let tr = table.insertRow(-1); // Insert a row at the end of the table
-      for (const [j, col] of row.split(',').entries()) { //columns
+      let rowsData = row.split(',').entries()
+      for (const [j, col] of rowsData) { //columns
         let letter = String.fromCharCode('A'.charCodeAt(0) + j - 1); //returns a string created from the specified sequence of UTF-16 code units
         let cellId = letter + i 
         let td = tr.insertCell(-1); // Insert a cell in the row at end of the row
         td.innerHTML = i && j // check if true / everything with 0 is false
           ? `<input id='${cellId}' placeholder='${col}'/>` // if true add input with id
-          : i || letter; // if false add letter to first row, then firstly row num       
-        arr.push(col)
-        tableData[i] = { id: i, A: arr[i]}  
-        }    
+          : i || letter; // if false add letter to first row, then firstly row num
+        arr.push([i,col])
+      }    
     }
-    console.log(arr)
+    let t2arr = tableToArray(table)
+    console.log(t2arr)
+
   })
   .then((data) => {
     
@@ -289,7 +322,11 @@ fetch('dummy.csv')
     //console.log(tableData)
   })
 
-
+function getEveryNth(arr, nth) {
+  const result = [];  
+  for (let i = 0; i < arr.length; i += nth) result.push(arr[i]);
+  return result;
+}
 /** EXPORT TO CSV */
 function handleClick(){let q = 'Proceed with action?'; confirm(q) == true ? exportL() : false;}
 
